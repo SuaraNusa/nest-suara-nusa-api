@@ -12,3 +12,22 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+enum UserGender {
+  MAN
+  WOMAN
+}
+
+model User {
+  id              BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  uniqueId        String     @unique @db.VarChar(512)
+  name            String     @db.VarChar(255)
+  gender          UserGender @default(MAN)
+  email           String     @unique @db.VarChar(255)
+  emailVerifiedAt DateTime?  @map("email_verified_at") @db.Timestamp()
+  password        String     @db.VarChar(512)
+  telephone       String?    @unique @db.VarChar(13)
+  photoPath       String?    @map("photo_path") @db.VarChar(255)
+
+  @@map("users")
+}
