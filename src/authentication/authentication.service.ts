@@ -6,6 +6,8 @@ import ValidationService from '../common/validation.service';
 import { AuthenticationValidation } from './authentication.validation';
 import * as bcrypt from 'bcrypt';
 import { LoggedUser } from './dto/logged-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ResponseAuthenticationDto } from '../dto/response.authentication';
 
 @Injectable()
 export class AuthenticationService {
@@ -13,6 +15,7 @@ export class AuthenticationService {
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
     private readonly validationService: ValidationService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async validateUserCredentials(
@@ -55,9 +58,15 @@ export class AuthenticationService {
     return `This action returns a #${id} authentication`;
   }
 
-
-
   remove(id: number) {
     return `This action removes a #${id} authentication`;
+  }
+
+  async signAccessToken(
+    loggedUser: LoggedUser,
+  ): Promise<ResponseAuthenticationDto> {
+    return {
+      accessToken: await this.jwtService.signAsync(loggedUser),
+    };
   }
 }

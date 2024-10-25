@@ -10,6 +10,10 @@ import {
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
+import { CurrentUser } from './decorator/current-user.dto';
+import { LoggedUser } from './dto/logged-user.dto';
+import { WebResponse } from '../model/web.response';
+import { ResponseAuthenticationDto } from '../dto/response.authentication';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -18,8 +22,14 @@ export class AuthenticationController {
   @Get()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  signUp() {
-    return 'Successfully logged in';
+  async signIn(
+    @CurrentUser() loggedUser: LoggedUser,
+  ): Promise<WebResponse<ResponseAuthenticationDto>> {
+    return {
+      result: {
+        data: await this.authenticationService.signAccessToken(loggedUser),
+      },
+    };
   }
 
   @UseGuards(LocalAuthGuard)
