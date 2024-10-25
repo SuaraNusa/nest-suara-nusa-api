@@ -13,7 +13,7 @@ import { LocalAuthGuard } from './guard/local-auth.guard';
 import { CurrentUser } from './decorator/current-user.dto';
 import { LoggedUser } from './dto/logged-user.dto';
 import { WebResponse } from '../model/web.response';
-import { ResponseAuthenticationDto } from '../dto/response.authentication';
+import { ResponseAuthenticationDto } from './dto/response.authentication';
 
 @Controller('authentication')
 export class AuthenticationController {

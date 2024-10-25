@@ -19,15 +19,27 @@ enum UserGender {
 }
 
 model User {
-  id              BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
-  uniqueId        String     @unique @db.VarChar(512)
-  name            String     @db.VarChar(255)
-  gender          UserGender @default(MAN)
-  email           String     @unique @db.VarChar(255)
-  emailVerifiedAt DateTime?  @map("email_verified_at") @db.Timestamp()
-  password        String     @db.VarChar(512)
-  telephone       String?    @unique @db.VarChar(13)
-  photoPath       String?    @map("photo_path") @db.VarChar(255)
+  id                   BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  uniqueId             String                 @unique @db.VarChar(512)
+  name                 String                 @db.VarChar(255)
+  gender               UserGender             @default(MAN)
+  email                String                 @unique @db.VarChar(255)
+  emailVerifiedAt      DateTime?              @map("email_verified_at") @db.Timestamp()
+  password             String                 @db.VarChar(512)
+  telephone            String?                @unique @db.VarChar(13)
+  photoPath            String?                @map("photo_path") @db.VarChar(255)
+  OneTimePasswordToken OneTimePasswordToken[]
 
   @@map("users")
+}
+
+model OneTimePasswordToken {
+  id          BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  userId      BigInt   @map("user_id") @db.UnsignedBigInt
+  User        User     @relation(fields: [userId], references: [id])
+  hashedToken String   @map("hashed_token") @db.VarChar(255)
+  expiresAt   DateTime @map("expires_at") @db.Timestamp()
+  isValid     Boolean  @default(false) @map("is_valid")
+
+  @@map("one_time_password_tokens")
 }
