@@ -13,6 +13,11 @@ async function bootstrap() {
   const documentFactory = () =>
     SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, documentFactory);
+
+  BigInt.prototype['toJSON'] = function () {
+    const bigInt = Number.parseInt(this.toString());
+    return bigInt ?? this.toString();
+  };
   await app.listen(3000);
 }
 
