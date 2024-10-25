@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { GoogleStrategy } from './strategy/google.strategy';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { JwtAuthGuard } from './guard/jwt-auth.guard';
     AuthenticationService,
     LocalStrategy,
     JwtStrategy,
+    GoogleStrategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

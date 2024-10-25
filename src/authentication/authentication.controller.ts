@@ -10,10 +10,11 @@ import {
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
-import { CurrentUser } from './decorator/current-user.dto';
 import { LoggedUser } from './dto/logged-user.dto';
 import { WebResponse } from '../model/web.response';
-import { ResponseAuthenticationDto } from './dto/response.authentication';
+import { CurrentUser } from './decorator/current-user.decorator';
+import { ResponseAuthenticationDto } from './dto/authentication-token.dto';
+import { GoogleOAuthGuard } from './guard/google-auth.guard';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -42,13 +43,13 @@ export class AuthenticationController {
     });
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authenticationService.findOne(+id);
-  }
+  @Get()
+  @UseGuards(GoogleOAuthGuard)
+  async googleAuth(@Request() expressRequest: Express.Request) {}
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authenticationService.remove(+id);
+  @Get('google-redirect')
+  @UseGuards(GoogleOAuthGuard)
+  googleAuthRedirect(@Request() expressRequest: Express.Request) {
+    return this.authenticationService.handleGoogleLogin(expressRequest);
   }
 }

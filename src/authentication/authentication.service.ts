@@ -8,9 +8,9 @@ import * as bcrypt from 'bcrypt';
 import { LoggedUser } from './dto/logged-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import CommonHelper from '../helper/CommonHelper';
-import { OneTimePasswordToken, User } from "@prisma/client";
+import { OneTimePasswordToken, User } from '@prisma/client';
 import { MailerService } from '../common/mailer.service';
-import { ResponseAuthenticationDto } from "./dto/authentication-token.dto";
+import { ResponseAuthenticationDto } from './dto/authentication-token.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -148,5 +148,16 @@ export class AuthenticationService {
         return false;
       }
     });
+  }
+
+  handleGoogleLogin(expressRequest: Express.Request) {
+    if (!expressRequest['user']) {
+      return 'No user from google';
+    }
+
+    return {
+      message: 'User information from google',
+      user: expressRequest['user'],
+    };
   }
 }
