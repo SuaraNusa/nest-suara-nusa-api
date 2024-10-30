@@ -1,6 +1,8 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NoVerifiedEmailGuard } from './authentication/guard/no-verified-email.guard';
+import PrismaService from './common/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +15,11 @@ async function bootstrap() {
   const documentFactory = () =>
     SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, documentFactory);
+
+  // Global Guards
+  app.useGlobalGuards(
+    new NoVerifiedEmailGuard(app.get(Reflector), app.get(PrismaService)),
+  );
 
   BigInt.prototype['toJSON'] = function () {
     const bigInt = Number.parseInt(this.toString());
