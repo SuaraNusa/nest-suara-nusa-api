@@ -16,6 +16,7 @@ import { ResponseAuthenticationDto } from './dto/authentication-token.dto';
 import { GoogleOAuthGuard } from './guard/google-auth.guard';
 import { Public } from './decorator/public.decorator';
 import { SignUpDto } from './dto/sign-up.dto';
+import { NoVerifiedEmail } from './decorator/no-verified-email';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -23,6 +24,7 @@ export class AuthenticationController {
 
   @Public()
   @UseGuards(LocalAuthGuard)
+  @NoVerifiedEmail()
   @Post('login')
   async signIn(
     @CurrentUser() loggedUser: LoggedUser,
@@ -53,6 +55,22 @@ export class AuthenticationController {
       },
     };
   }
+
+  @NoVerifiedEmail()
+  @Get('generate-otp')
+  async generateOneTimePasswordVerification(
+    @CurrentUser() currentUser: LoggedUser,
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        data: await this.authenticationService.generateOneTimePasswordVerification(
+          currentUser,
+        ),
+      },
+    };
+  }
+
+  async generateOneTimePasswordToken() {}
 
   @Get()
   @UseGuards(GoogleOAuthGuard)

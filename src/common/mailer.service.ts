@@ -3,7 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { EmailTransfer } from '../model/email.transfer';
 import Mail from 'nodemailer/lib/mailer';
 import { SentMessageInfo, Transporter } from 'nodemailer';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
+@Injectable()
 export class MailerService {
   constructor(private readonly configService: ConfigService) {}
 
@@ -13,11 +15,15 @@ export class MailerService {
     if (!this.nodeMailerTransporter) {
       this.nodeMailerTransporter = nodeMailer.createTransport({
         host: this.configService.get<string>('NODE_MAILER_HOST'),
-        port: this.configService.get<string>('NODE_MAILER_PORT'),
-        secure: this.configService.get<string>('NODE_MAILER_IS_SECURE'), // true for port 465, false for other ports
+        port: +this.configService.get<string>('NODE_MAILER_PORT'), // Convert to number
+        secure:
+          this.configService.get<string>('NODE_MAILER_IS_SECURE') === 'true', // Ensure boolean
         auth: {
           user: this.configService.get<string>('NODE_MAILER_USERNAME'),
           pass: this.configService.get<string>('NODE_MAILER_PASSWORD'),
+        },
+        tls: {
+          rejectUnauthorized: false, // Optional: Bypass SSL validation (not recommended in production)
         },
       } as nodeMailer.TransportOptions);
     }
@@ -45,6 +51,10 @@ export class MailerService {
       return await nodeMailerTransporter.sendMail(mailOptions);
     } catch (err) {
       console.log(err);
+      throw new HttpException(
+        'Error while sending email',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
