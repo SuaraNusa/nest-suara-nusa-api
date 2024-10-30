@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserCredentials } from './dto/user-credentials.dto';
 import { ConfigService } from '@nestjs/config';
 import PrismaService from '../common/prisma.service';
@@ -11,6 +16,8 @@ import CommonHelper from '../helper/CommonHelper';
 import { OneTimePasswordToken, User } from '@prisma/client';
 import { MailerService } from '../common/mailer.service';
 import { ResponseAuthenticationDto } from './dto/authentication-token.dto';
+import { SignUpDto } from './dto/sign-up.dto';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthenticationService {
@@ -159,5 +166,43 @@ export class AuthenticationService {
       message: 'User information from google',
       user: expressRequest['user'],
     };
+  }
+
+  signUp(signUpDto: SignUpDto) {
+    const validatedSignUpRequest = this.validationService.validate(
+      AuthenticationValidation.SIGN_UP,
+      signUpDto,
+    );
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const isEmailExist = await prismaTransaction.user.count({
+        where: {
+          email: signUpDto.email,
+        },
+      });
+      if (isEmailExist > 0) {
+        throw new HttpException(
+          'Email has been registered before!',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      let hashedPassword = '';
+      try {
+        const hashSalt = await bcrypt.genSalt(10); // Generate hashSalt
+        hashedPassword = await bcrypt.hash(signUpDto.password, hashSalt); // Hash the password
+      } catch (error) {
+        throw new HttpException(
+          'Error when trying to process request',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      await prismaTransaction.user.create({
+        data: {
+          ...validatedSignUpRequest,
+          password: hashedPassword,
+          uniqueId: uuidv4(),
+        },
+      });
+      return 'User successfully registered';
+    });
   }
 }

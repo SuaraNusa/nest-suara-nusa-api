@@ -1,12 +1,11 @@
 import {
   Controller,
   Get,
-  Param,
-  Delete,
   UseGuards,
   Post,
   Request,
   HttpException,
+  Body,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
@@ -15,12 +14,15 @@ import { WebResponse } from '../model/web.response';
 import { CurrentUser } from './decorator/current-user.decorator';
 import { ResponseAuthenticationDto } from './dto/authentication-token.dto';
 import { GoogleOAuthGuard } from './guard/google-auth.guard';
+import { Public } from './decorator/public.decorator';
+import { SignUpDto } from './dto/sign-up.dto';
 
 @Controller('authentication')
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
   @Get()
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async signIn(
@@ -34,13 +36,23 @@ export class AuthenticationController {
   }
 
   @UseGuards(LocalAuthGuard)
-  @Post('auth/logout')
-  async logout(@Request() a: Express.Request) {
-    return a.logout((err) => {
+  @Post('logout')
+  async logout(@Request() expressRequest: Express.Request) {
+    return expressRequest.logout((err) => {
       if (err) {
         throw new HttpException('Failed to logout', err.status);
       }
     });
+  }
+
+  @Public()
+  @Post('register')
+  async signUp(@Body() signUpDto: SignUpDto): Promise<WebResponse<string>> {
+    return {
+      result: {
+        data: await this.authenticationService.signUp(signUpDto),
+      },
+    };
   }
 
   @Get()
