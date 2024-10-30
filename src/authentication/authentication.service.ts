@@ -44,7 +44,10 @@ export class AuthenticationService {
           },
         })
         .catch(() => {
-          return null;
+          throw new HttpException(
+            `User with email ${validatedUserCredentials.email} not found`,
+            HttpStatus.UNAUTHORIZED,
+          );
         });
       bcrypt.compare(
         validatedUserCredentials.password,

@@ -21,7 +21,6 @@ import { SignUpDto } from './dto/sign-up.dto';
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
-  @Get()
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
