@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class GoogleOAuthGuard extends AuthGuard('google') {
-  constructor(private configService: ConfigService) {
+  constructor(private reflector: Reflector) {
     super({
       accessType: 'offline',
     });

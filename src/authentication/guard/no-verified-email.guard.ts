@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import PrismaService from '../../common/prisma.service';
-import { NO_VERIFIED_EMAIL } from '../decorator/no-verified-email';
+import { NO_VERIFIED_EMAIL } from '../decorator/no-verified-email.decorator';
 
 @Injectable()
 export class NoVerifiedEmailGuard implements CanActivate {

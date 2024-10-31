@@ -16,7 +16,8 @@ import { ResponseAuthenticationDto } from './dto/authentication-token.dto';
 import { GoogleOAuthGuard } from './guard/google-auth.guard';
 import { Public } from './decorator/public.decorator';
 import { SignUpDto } from './dto/sign-up.dto';
-import { NoVerifiedEmail } from './decorator/no-verified-email';
+import { NoVerifiedEmail } from './decorator/no-verified-email.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -72,10 +73,14 @@ export class AuthenticationController {
 
   async generateOneTimePasswordToken() {}
 
-  @Get()
+  @Public()
+  @NoVerifiedEmail()
+  @Get('google')
   @UseGuards(GoogleOAuthGuard)
   async googleAuth(@Request() expressRequest: Express.Request) {}
 
+  @Public()
+  @NoVerifiedEmail()
   @Get('google-redirect')
   @UseGuards(GoogleOAuthGuard)
   googleAuthRedirect(@Request() expressRequest: Express.Request) {
