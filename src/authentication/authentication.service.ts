@@ -18,6 +18,7 @@ import { MailerService } from '../common/mailer.service';
 import { ResponseAuthenticationDto } from './dto/authentication-token.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { log } from 'winston';
 
 @Injectable()
 export class AuthenticationService {
@@ -69,6 +70,7 @@ export class AuthenticationService {
   ): Promise<ResponseAuthenticationDto> {
     return {
       accessToken: await this.jwtService.signAsync(loggedUser),
+      refreshToken: null,
     };
   }
 
@@ -160,15 +162,41 @@ export class AuthenticationService {
     });
   }
 
-  handleGoogleLogin(expressRequest: Express.Request) {
-    if (!expressRequest['user']) {
-      return 'No user from google';
-    }
-
-    return {
-      message: 'User information from google',
-      user: expressRequest['user'],
-    };
+  async handleGoogleLogin(expressRequest: Express.Request) {
+    const currentUser = expressRequest['user'];
+    console.log(currentUser);
+    await this.prismaService.$transaction(async (prismaTransaction) => {
+      const userPrisma: User = await prismaTransaction.user.findFirst({
+        where: {
+          email: currentUser['email'],
+        },
+      });
+      const generatedUserUniqueId = uuidv4();
+      if (userPrisma) {
+        await prismaTransaction.user.create({
+          data: {
+            uniqueId: generatedUserUniqueId,
+            email: currentUser['email'],
+            name: `${currentUser['firstName']} ${currentUser['lastName']}`,
+            photoPath: currentUser['photo'],
+            isExternal: true,
+          },
+        });
+      }
+      const loggedUser: LoggedUser = {
+        uniqueId: generatedUserUniqueId,
+        name: `${currentUser['firstName']} ${currentUser['lastName']}`,
+        gender: 'MAN',
+        email: currentUser['email'],
+        emailVerifiedAt: new Date(),
+        telephone: null,
+      };
+      console.log(loggedUser);
+      return {
+        accessToken: this.jwtService.signAsync(loggedUser),
+        refreshToken: currentUser['refreshToken'],
+      };
+    });
   }
 
   signUp(signUpDto: SignUpDto) {
