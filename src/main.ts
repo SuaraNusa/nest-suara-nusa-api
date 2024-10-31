@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NoVerifiedEmailGuard } from './authentication/guard/no-verified-email.guard';
 import PrismaService from './common/prisma.service';
+import * as fs from 'node:fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,9 +13,9 @@ async function bootstrap() {
     .setDescription('SuaraNusa API Documentation - Bangkit 2024 Batch II')
     .setVersion('1.0')
     .build();
-  const documentFactory = () =>
-    SwaggerModule.createDocument(app, swaggerConfig);
+  const documentFactory = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, documentFactory);
+  fs.writeFileSync('./openapi.json', JSON.stringify(documentFactory));
 
   // Global Guards
   app.useGlobalGuards(
