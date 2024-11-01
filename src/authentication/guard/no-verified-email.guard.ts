@@ -7,6 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import PrismaService from '../../common/prisma.service';
 import { NO_VERIFIED_EMAIL } from '../decorator/no-verified-email.decorator';
+import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
 
 @Injectable()
 export class NoVerifiedEmailGuard implements CanActivate {
@@ -16,6 +17,13 @@ export class NoVerifiedEmailGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic: boolean = this.reflector.getAllAndOverride<boolean>(
+      IS_PUBLIC_KEY,
+      [context.getHandler(), context.getClass],
+    );
+    if (isPublic) {
+      return true;
+    }
     // Mengecek apakah decorator NO_VERIFIED_EMAIL ada dan di-set ke true
     const noVerifiedEmail: boolean = this.reflector.getAllAndOverride<boolean>(
       NO_VERIFIED_EMAIL,
