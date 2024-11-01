@@ -7,11 +7,11 @@ export class AuthenticationValidation {
   });
   static SIGN_UP: ZodType = z.object({
     name: z.string().min(5).max(100),
-    telephone: z.string().min(1).max(13),
+    email: z.string().email().min(1).max(255),
     password: z.string().min(1).max(100),
     verification_questions: z.array(
       z.object({
-        question_id: z.number().min(1),
+        verificationQuestionId: z.number().min(1),
         answer: z.string().min(1).max(200),
       }),
     ),

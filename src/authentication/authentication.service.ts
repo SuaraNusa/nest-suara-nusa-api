@@ -223,16 +223,22 @@ export class AuthenticationService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
+      const {
+        verification_questions: verificationQuestion,
+        ...remainderProperty
+      } = validatedSignUpRequest;
       await prismaTransaction.user.create({
         data: {
-          ...validatedSignUpRequest,
+          ...remainderProperty,
           password: hashedPassword,
           uniqueId: uuidv4(),
+          UserVerificationQuestion: {
+            create: verificationQuestion,
+          },
         },
-      });
-      validatedSignUpRequest.verification_questions;
-      await prismaTransaction.userVerificationQuestion.createMany({
-        data: validatedSignUpRequest.verification_questions,
+        include: {
+          UserVerificationQuestion: true,
+        },
       });
       return 'User successfully registered';
     });

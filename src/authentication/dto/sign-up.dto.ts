@@ -4,7 +4,7 @@ export class SignUpDto {
   password: string;
   verification_questions: [
     {
-      question_id: number;
+      verificationQuestionId: number;
       answer: string;
     },
   ];
