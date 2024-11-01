@@ -4,6 +4,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NoVerifiedEmailGuard } from './authentication/guard/no-verified-email.guard';
 import PrismaService from './common/prisma.service';
 import * as fs from 'node:fs';
+import PrismaExceptionFilter from './exception/PrismaExceptionFilter';
+import ValidationExceptionFilter from './exception/ValidationExceptionFilter';
+import MulterExceptionFilter from './exception/MulterExceptionFilter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +19,11 @@ async function bootstrap() {
   const documentFactory = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, documentFactory);
   fs.writeFileSync('./openapi.json', JSON.stringify(documentFactory));
+
+  // Exception Filter
+  app.useGlobalFilters(new PrismaExceptionFilter());
+  app.useGlobalFilters(new ValidationExceptionFilter());
+  app.useGlobalFilters(new MulterExceptionFilter());
 
   // Global Guards
   app.useGlobalGuards(
