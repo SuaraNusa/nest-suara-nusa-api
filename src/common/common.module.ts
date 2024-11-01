@@ -4,6 +4,7 @@ import * as winston from 'winston';
 import PrismaService from './prisma.service';
 import ValidationService from './validation.service';
 import { MailerService } from './mailer.service';
+import { ModelRegistryService } from './model-registry.service';
 
 @Module({
   imports: [
@@ -23,7 +24,17 @@ import { MailerService } from './mailer.service';
       ],
     }),
   ],
-  providers: [PrismaService, ValidationService, MailerService],
-  exports: [PrismaService, ValidationService, MailerService],
+  providers: [
+    PrismaService,
+    ValidationService,
+    MailerService,
+    ModelRegistryService,
+  ],
+  exports: [
+    PrismaService,
+    ValidationService,
+    MailerService,
+    ModelRegistryService,
+  ],
 })
 export class CommonModule {}
