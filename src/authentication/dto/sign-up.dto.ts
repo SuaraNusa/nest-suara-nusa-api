@@ -1,7 +1,11 @@
 export class SignUpDto {
   name: string;
-  gender: string;
   email: string;
   password: string;
-  telephone: string;
+  verification_questions: [
+    {
+      question_id: number;
+      answer: string;
+    },
+  ];
 }

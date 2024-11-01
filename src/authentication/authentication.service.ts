@@ -18,7 +18,6 @@ import { MailerService } from '../common/mailer.service';
 import { ResponseAuthenticationDto } from './dto/authentication-token.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { log } from 'winston';
 
 @Injectable()
 export class AuthenticationService {
@@ -186,10 +185,8 @@ export class AuthenticationService {
       const loggedUser: LoggedUser = {
         uniqueId: generatedUserUniqueId,
         name: `${currentUser['firstName']} ${currentUser['lastName']}`,
-        gender: 'MAN',
         email: currentUser['email'],
         emailVerifiedAt: new Date(),
-        telephone: null,
       };
       console.log(loggedUser);
       return {
@@ -232,6 +229,10 @@ export class AuthenticationService {
           password: hashedPassword,
           uniqueId: uuidv4(),
         },
+      });
+      validatedSignUpRequest.verification_questions;
+      await prismaTransaction.userVerificationQuestion.createMany({
+        data: validatedSignUpRequest.verification_questions,
       });
       return 'User successfully registered';
     });

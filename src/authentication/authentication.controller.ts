@@ -17,7 +17,6 @@ import { GoogleOAuthGuard } from './guard/google-auth.guard';
 import { Public } from './decorator/public.decorator';
 import { SignUpDto } from './dto/sign-up.dto';
 import { NoVerifiedEmail } from './decorator/no-verified-email.decorator';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('authentication')
 export class AuthenticationController {
