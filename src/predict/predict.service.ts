@@ -7,6 +7,8 @@ import ValidationService from '../common/validation.service';
 import * as tf from '@tensorflow/tfjs-node';
 import { AudioContext } from 'node-web-audio-api';
 import { tensor } from '@tensorflow/tfjs-node';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 @Injectable()
 export class PredictService {
@@ -52,7 +54,10 @@ export class PredictService {
 
     // Ambil kelas prediksi
     const predictedClass = (await predictions.argMax(-1).data())[0];
-    console.log(predictedClass);
+    const filePath = path.join(process.cwd(), 'src/core/prediction.json');
+
+    const parsedLabelClass = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    console.log(parsedLabelClass[predictedClass]);
   }
 
   findAll() {
