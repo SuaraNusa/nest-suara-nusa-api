@@ -5,7 +5,7 @@ import { UserModule } from './user/user.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { CommonModule } from './common/common.module';
 import { ConfigModule } from '@nestjs/config';
-import { MailerService } from './common/mailer.service';
+import { PredictModule } from './predict/predict.module';
 
 @Module({
   imports: [
@@ -15,6 +15,7 @@ import { MailerService } from './common/mailer.service';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    PredictModule,
   ],
   controllers: [AppController],
   providers: [AppService],
