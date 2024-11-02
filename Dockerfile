@@ -1,43 +1,32 @@
-# PRODUCTION DOCKERFILE
-# ---------------------
-# This Dockerfile allows to build a Docker image of the NestJS application
-# and based on a NodeJS 20 image. The multi-stage mechanism allows to build
-# the application in a "builder" stage and then create a lightweight production
-# image containing the required dependencies and the JS build files.
-#
-# Dockerfile best practices
-# https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
-# Dockerized NodeJS best practices
-# https://github.com/nodejs/docker-node/blob/master/docs/BestPractices.md
-# https://www.bretfisher.com/node-docker-good-defaults/
-# http://goldbergyoni.com/checklist-best-practice-of-node-js-in-production/
+# Stage 1: Build dependencies
+FROM node:22 AS builder
 
-FROM node:20-alpine as builder
+WORKDIR /usr/src/app
 
-ENV NODE_ENV build
-
-USER node
-WORKDIR /home/node
-
+# Salin package.json dan package-lock.json lalu instal dependensi
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
-COPY --chown=node:node . .
-RUN npx prisma generate \
-    && npm run build \
-    && npm prune --omit=dev
+# Salin Prisma schema dan generate Prisma Client
+COPY prisma ./prisma/
+RUN npx prisma generate
 
-# ---
+# Salin seluruh kode aplikasi dan build
+COPY . .
+RUN npm run build
 
-FROM node:20-alpine
+# Stage 2: Copy build output to final image
+FROM node:22 AS runner
 
-ENV NODE_ENV production
+WORKDIR /usr/src/app
 
-USER node
-WORKDIR /home/node
+# Salin node_modules dan hasil build dari tahap builder
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/prisma ./prisma
 
-COPY --from=builder --chown=node:node /home/node/package*.json ./
-COPY --from=builder --chown=node:node /home/node/node_modules/ ./node_modules/
-COPY --from=builder --chown=node:node /home/node/dist/ ./dist/
+# Expose port yang digunakan oleh aplikasi
+EXPOSE 8080
 
+# Jalankan aplikasi
 CMD ["node", "dist/main.js"]
