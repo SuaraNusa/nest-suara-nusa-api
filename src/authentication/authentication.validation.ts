@@ -17,10 +17,24 @@ export class AuthenticationValidation {
           answer: z.string().min(1).max(200),
         }),
       ),
-      isVerified: z.boolean().optional(),
     })
     .superRefine(({ confirm_password, password }, ctx) => {
       if (confirm_password !== password) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'The passwords did not match',
+          path: ['confirm_password'],
+        });
+      }
+    });
+
+  static RESET_PASSWORD: ZodType = z
+    .object({
+      newPassword: z.string().min(1).max(100),
+      confirmationNewPassword: z.string().min(1).max(100),
+    })
+    .superRefine(({ newPassword, confirmationNewPassword }, ctx) => {
+      if (newPassword !== confirmationNewPassword) {
         ctx.addIssue({
           code: 'custom',
           message: 'The passwords did not match',

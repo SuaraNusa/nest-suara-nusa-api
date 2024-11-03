@@ -17,6 +17,8 @@ import { GoogleOAuthGuard } from './guard/google-auth.guard';
 import { Public } from './decorator/public.decorator';
 import { SignUpDto } from './dto/sign-up.dto';
 import { NoVerifiedEmail } from './decorator/no-verified-email.decorator';
+import { VerifyToken } from './dto/verify-token.dto';
+import { ResetPassword } from './dto/reset-password.dto';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -70,7 +72,33 @@ export class AuthenticationController {
     };
   }
 
-  async generateOneTimePasswordToken() {}
+  @NoVerifiedEmail()
+  @Post('verify-otp')
+  async verifyOneTimePasswordVerification(
+    @CurrentUser() loggedUser: LoggedUser,
+    verifyToken: VerifyToken,
+  ): Promise<WebResponse<string>> {
+    return {
+      result: {
+        data: await this.authenticationService.verifyOneTimePasswordToken(
+          loggedUser,
+          verifyToken.token,
+        ),
+      },
+    };
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @CurrentUser() loggedUser: LoggedUser,
+    resetPassword: ResetPassword,
+  ) {
+    return {
+      result: {
+        data: await this.authenticationService.handleResetPassword(),
+      },
+    };
+  }
 
   @Public()
   @NoVerifiedEmail()

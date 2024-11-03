@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserCredentials } from './dto/user-credentials.dto';
@@ -18,6 +19,7 @@ import { MailerService } from '../common/mailer.service';
 import { ResponseAuthenticationDto } from './dto/authentication-token.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { ResetPassword } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -119,7 +121,7 @@ export class AuthenticationService {
   async verifyOneTimePasswordToken(
     currentUser: LoggedUser,
     oneTimePassword: string,
-  ): Promise<boolean> {
+  ): Promise<string> {
     return this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma: User = await prismaTransaction.user
         .findFirst({
@@ -154,9 +156,9 @@ export class AuthenticationService {
             emailVerifiedAt: new Date(),
           },
         });
-        return true;
+        return 'One time password verified';
       } else {
-        return false;
+        return 'One time password not valid';
       }
     });
   }
@@ -241,6 +243,39 @@ export class AuthenticationService {
         },
       });
       return 'User successfully registered';
+    });
+  }
+
+  async handleResetPassword(
+    loggedUser: LoggedUser,
+    resetPassword: ResetPassword,
+  ) {
+    const validatedResetPassword = this.validationService.validate(
+      AuthenticationValidation.RESET_PASSWORD,
+      resetPassword,
+    );
+    return this.prismaService.$transaction(async (prismaTransaction) => {
+      const { id: userId } = await prismaTransaction.user
+        .findFirstOrThrow({
+          where: {
+            uniqueId: loggedUser.uniqueId,
+          },
+          select: {
+            id: true,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('User not found');
+        });
+      await prismaTransaction.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          password: validatedResetPassword.newPassword,
+        },
+      });
+      return 'User has successfully change password';
     });
   }
 }
