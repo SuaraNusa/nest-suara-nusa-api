@@ -20,6 +20,9 @@ FROM node:22 AS runner
 
 WORKDIR /usr/src/app
 
+# Install libasound2 untuk mendukung audio
+RUN apt-get update && apt-get install -y libasound2 && rm -rf /var/lib/apt/lists/*
+
 # Salin node_modules dan hasil build dari tahap builder
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/dist ./dist
