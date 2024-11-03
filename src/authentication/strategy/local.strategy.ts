@@ -16,7 +16,10 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super({ usernameField: 'email', passwordField: 'password' });
   }
 
-  async validate(userEmail: string, userPassword: string): Promise<LoggedUserDto> {
+  async validate(
+    userEmail: string,
+    userPassword: string,
+  ): Promise<LoggedUserDto> {
     const userCredentials: UserCredentialDto = new UserCredentialDto(
       userEmail,
       userPassword,
@@ -24,7 +27,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const loggedUser: LoggedUserDto =
       await this.authenticationService.validateUserCredentials(userCredentials);
     if (!loggedUser) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Credentials not valid');
     }
     return loggedUser;
   }
