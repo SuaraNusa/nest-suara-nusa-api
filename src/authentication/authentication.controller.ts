@@ -95,7 +95,10 @@ export class AuthenticationController {
   ) {
     return {
       result: {
-        data: await this.authenticationService.handleResetPassword(),
+        data: await this.authenticationService.handleResetPassword(
+          loggedUser,
+          resetPassword,
+        ),
       },
     };
   }
