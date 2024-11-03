@@ -9,16 +9,17 @@ import {
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
-import { LoggedUser } from './dto/logged-user.dto';
-import { WebResponse } from '../model/web.response';
+import { LoggedUserDto } from './dto/logged-user.dto';
+import { WebResponseDto } from '../model/web.response.dto';
 import { CurrentUser } from './decorator/current-user.decorator';
-import { ResponseAuthenticationDto } from './dto/authentication-token.dto';
+import { AuthenticationTokenDto } from './dto/authentication-token.dto';
 import { GoogleOAuthGuard } from './guard/google-auth.guard';
 import { Public } from './decorator/public.decorator';
 import { SignUpDto } from './dto/sign-up.dto';
 import { NoVerifiedEmail } from './decorator/no-verified-email.decorator';
-import { VerifyToken } from './dto/verify-token.dto';
-import { ResetPassword } from './dto/reset-password.dto';
+import { VerifyTokenDto } from './dto/verify-token.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ApiCreatedResponse } from '@nestjs/swagger';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -29,8 +30,8 @@ export class AuthenticationController {
   @NoVerifiedEmail()
   @Post('login')
   async signIn(
-    @CurrentUser() loggedUser: LoggedUser,
-  ): Promise<WebResponse<ResponseAuthenticationDto>> {
+    @CurrentUser() loggedUser: LoggedUserDto,
+  ): Promise<WebResponseDto<AuthenticationTokenDto>> {
     return {
       result: {
         data: await this.authenticationService.signAccessToken(loggedUser),
@@ -50,7 +51,7 @@ export class AuthenticationController {
 
   @Public()
   @Post('register')
-  async signUp(@Body() signUpDto: SignUpDto): Promise<WebResponse<string>> {
+  async signUp(@Body() signUpDto: SignUpDto): Promise<WebResponseDto<string>> {
     return {
       result: {
         data: await this.authenticationService.signUp(signUpDto),
@@ -60,9 +61,13 @@ export class AuthenticationController {
 
   @NoVerifiedEmail()
   @Get('generate-otp')
+  @ApiCreatedResponse({
+    description: 'The OTP has been successfully sent',
+    type: 'Successfully send one time password',
+  })
   async generateOneTimePasswordVerification(
-    @CurrentUser() currentUser: LoggedUser,
-  ): Promise<WebResponse<string>> {
+    @CurrentUser() currentUser: LoggedUserDto,
+  ): Promise<WebResponseDto<string>> {
     return {
       result: {
         data: await this.authenticationService.generateOneTimePasswordVerification(
@@ -75,9 +80,9 @@ export class AuthenticationController {
   @NoVerifiedEmail()
   @Post('verify-otp')
   async verifyOneTimePasswordVerification(
-    @CurrentUser() loggedUser: LoggedUser,
-    verifyToken: VerifyToken,
-  ): Promise<WebResponse<string>> {
+    @CurrentUser() loggedUser: LoggedUserDto,
+    verifyToken: VerifyTokenDto,
+  ): Promise<WebResponseDto<string>> {
     return {
       result: {
         data: await this.authenticationService.verifyOneTimePasswordToken(
@@ -90,8 +95,8 @@ export class AuthenticationController {
 
   @Post('reset-password')
   async resetPassword(
-    @CurrentUser() loggedUser: LoggedUser,
-    resetPassword: ResetPassword,
+    @CurrentUser() loggedUser: LoggedUserDto,
+    resetPassword: ResetPasswordDto,
   ) {
     return {
       result: {

@@ -5,21 +5,21 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UserCredentials } from './dto/user-credentials.dto';
+import { UserCredentialDto } from './dto/user-credential.dto';
 import { ConfigService } from '@nestjs/config';
 import PrismaService from '../common/prisma.service';
 import ValidationService from '../common/validation.service';
 import { AuthenticationValidation } from './authentication.validation';
 import * as bcrypt from 'bcrypt';
-import { LoggedUser } from './dto/logged-user.dto';
+import { LoggedUserDto } from './dto/logged-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import CommonHelper from '../helper/CommonHelper';
 import { OneTimePasswordToken, User } from '@prisma/client';
 import { MailerService } from '../common/mailer.service';
-import { ResponseAuthenticationDto } from './dto/authentication-token.dto';
+import { AuthenticationTokenDto } from './dto/authentication-token.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { ResetPassword } from './dto/reset-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -32,8 +32,8 @@ export class AuthenticationService {
   ) {}
 
   async validateUserCredentials(
-    userCredentials: UserCredentials,
-  ): Promise<LoggedUser> {
+    userCredentials: UserCredentialDto,
+  ): Promise<LoggedUserDto> {
     const validatedUserCredentials = this.validationService.validate(
       AuthenticationValidation.USER_CREDENTIALS,
       userCredentials,
@@ -67,8 +67,8 @@ export class AuthenticationService {
   }
 
   async signAccessToken(
-    loggedUser: LoggedUser,
-  ): Promise<ResponseAuthenticationDto> {
+    loggedUser: LoggedUserDto,
+  ): Promise<AuthenticationTokenDto> {
     return {
       accessToken: await this.jwtService.signAsync(loggedUser),
       refreshToken: null,
@@ -76,7 +76,7 @@ export class AuthenticationService {
   }
 
   async generateOneTimePasswordVerification(
-    currentUser: LoggedUser,
+    currentUser: LoggedUserDto,
   ): Promise<string> {
     const generatedOneTimePassword = await this.prismaService.$transaction(
       async (prismaTransaction) => {
@@ -119,7 +119,7 @@ export class AuthenticationService {
   }
 
   async verifyOneTimePasswordToken(
-    currentUser: LoggedUser,
+    currentUser: LoggedUserDto,
     oneTimePassword: string,
   ): Promise<string> {
     return this.prismaService.$transaction(async (prismaTransaction) => {
@@ -184,7 +184,7 @@ export class AuthenticationService {
           },
         });
       }
-      const loggedUser: LoggedUser = {
+      const loggedUser: LoggedUserDto = {
         uniqueId: generatedUserUniqueId,
         name: `${currentUser['firstName']} ${currentUser['lastName']}`,
         email: currentUser['email'],
@@ -247,8 +247,8 @@ export class AuthenticationService {
   }
 
   async handleResetPassword(
-    loggedUser: LoggedUser,
-    resetPassword: ResetPassword,
+    loggedUser: LoggedUserDto,
+    resetPassword: ResetPasswordDto,
   ) {
     const validatedResetPassword = this.validationService.validate(
       AuthenticationValidation.RESET_PASSWORD,

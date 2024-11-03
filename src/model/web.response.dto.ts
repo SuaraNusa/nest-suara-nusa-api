@@ -10,7 +10,7 @@ export class Paging {
   }
 }
 
-export class WebResponse<T> {
+export class WebResponseDto<T> {
   result?: {
     data?: T | null;
     message?: string | null;

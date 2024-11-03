@@ -1,3 +1,3 @@
-export class VerifyToken {
+export class VerifyTokenDto {
   token: string;
 }

@@ -1,4 +1,4 @@
-export class LoggedUser {
+export class LoggedUserDto {
   uniqueId: string;
   name: string;
   email: string;

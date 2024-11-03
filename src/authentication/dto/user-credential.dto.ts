@@ -1,4 +1,4 @@
-export class UserCredentials {
+export class UserCredentialDto {
   constructor(email: string, password: string) {
     this.email = email;
     this.password = password;
