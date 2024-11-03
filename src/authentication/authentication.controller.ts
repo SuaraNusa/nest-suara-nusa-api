@@ -20,6 +20,10 @@ import { NoVerifiedEmail } from './decorator/no-verified-email.decorator';
 import { VerifyTokenDto } from './dto/verify-token.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ApiCreatedResponse } from '@nestjs/swagger';
+import {
+  ApiErrorResponseStringCustom,
+  ApiOkResponseCustom,
+} from '../helper/ResponseHelper';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -29,6 +33,11 @@ export class AuthenticationController {
   @UseGuards(LocalAuthGuard)
   @NoVerifiedEmail()
   @Post('login')
+  @ApiOkResponseCustom(AuthenticationTokenDto)
+  @ApiErrorResponseStringCustom(
+    'Returns "Credentials not valid" if authentication fails',
+    400,
+  ) // Dokumentasi respons kesalahan
   async signIn(
     @CurrentUser() loggedUser: LoggedUserDto,
   ): Promise<WebResponseDto<AuthenticationTokenDto>> {
