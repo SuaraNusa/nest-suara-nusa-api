@@ -34,7 +34,10 @@ async function bootstrap() {
     const bigInt = Number.parseInt(this.toString());
     return bigInt ?? this.toString();
   };
-  await app.listen(8080);
+  app.enableCors();
+
+  const port = process.env.PORT || 8080; // Jika PORT tidak disetel, gunakan 3000
+  await app.listen(port);
 }
 
 bootstrap();
