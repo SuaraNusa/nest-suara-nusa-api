@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { WebResponse } from '../model/web.response';
+import { WebResponseDto } from '../model/web.response.dto';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export default class PrismaExceptionFilter
@@ -12,7 +12,7 @@ export default class PrismaExceptionFilter
   catch(exception: PrismaClientKnownRequestError, host: ArgumentsHost): any {
     const http = host.switchToHttp();
     const response = http.getResponse<Response>();
-    const webResponse: WebResponse<string> = new WebResponse();
+    const webResponse: WebResponseDto<string> = new WebResponseDto();
     switch (exception.code) {
       case 'P2002':
         webResponse.errors.code = 'P2002';
