@@ -10,7 +10,9 @@ export default class ValidationExceptionFilter
   catch(exception: ZodError, host: ArgumentsHost): any {
     const http = host.switchToHttp();
     const response = http.getResponse<Response>();
-    const webResponse: WebResponseDto<ZodIssue[]> = new WebResponseDto<ZodIssue[]>();
+    const webResponse: WebResponseDto<ZodIssue[]> = new WebResponseDto<
+      ZodIssue[]
+    >();
     webResponse.errors.message = exception.issues; // Set errors to exception issues
     response.status(400).json(webResponse);
   }
