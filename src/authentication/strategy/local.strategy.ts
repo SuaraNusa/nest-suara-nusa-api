@@ -1,9 +1,9 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthenticationService } from '../authentication.service';
-import { UserCredentials } from '../dto/user-credentials.dto';
+import { UserCredentialDto } from '../dto/user-credential.dto';
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
-import { LoggedUser } from '../dto/logged-user.dto';
+import { LoggedUserDto } from '../dto/logged-user.dto';
 import { Logger, loggers } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
@@ -16,12 +16,12 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super({ usernameField: 'email', passwordField: 'password' });
   }
 
-  async validate(userEmail: string, userPassword: string): Promise<LoggedUser> {
-    const userCredentials: UserCredentials = new UserCredentials(
+  async validate(userEmail: string, userPassword: string): Promise<LoggedUserDto> {
+    const userCredentials: UserCredentialDto = new UserCredentialDto(
       userEmail,
       userPassword,
     );
-    const loggedUser: LoggedUser =
+    const loggedUser: LoggedUserDto =
       await this.authenticationService.validateUserCredentials(userCredentials);
     if (!loggedUser) {
       throw new UnauthorizedException();
