@@ -26,9 +26,9 @@ async function bootstrap() {
   app.useGlobalFilters(new MulterExceptionFilter());
 
   // Global Guards
-  app.useGlobalGuards(
-    new NoVerifiedEmailGuard(app.get(Reflector), app.get(PrismaService)),
-  );
+  // app.useGlobalGuards(
+  //   new NoVerifiedEmailGuard(app.get(Reflector), app.get(PrismaService)),
+  // );
 
   BigInt.prototype['toJSON'] = function () {
     const bigInt = Number.parseInt(this.toString());
