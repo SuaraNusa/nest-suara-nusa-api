@@ -37,7 +37,7 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile('profile') profileFile: Express.Multer.File,
   ) {
-    await this.userService.update(loggedUser, updateUserDto);
+    await this.userService.update(loggedUser, updateUserDto, profileFile);
   }
 
   @Delete(':id')
