@@ -225,8 +225,9 @@ export class AuthenticationService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
+      delete validatedSignUpRequest['confirmPassword'];
       const {
-        verification_questions: verificationQuestion,
+        verificationQuestions: verificationQuestion,
         ...remainderProperty
       } = validatedSignUpRequest;
       await prismaTransaction.user.create({

@@ -10,20 +10,20 @@ export class AuthenticationValidation {
       name: z.string().min(5).max(100),
       email: z.string().email().min(1).max(255),
       password: z.string().min(1).max(100),
-      confirm_password: z.string().min(1).max(100),
-      verification_questions: z.array(
+      confirmPassword: z.string().min(1).max(100),
+      verificationQuestions: z.array(
         z.object({
           verificationQuestionId: z.number().min(1),
           answer: z.string().min(1).max(200),
         }),
       ),
     })
-    .superRefine(({ confirm_password, password }, ctx) => {
-      if (confirm_password !== password) {
+    .superRefine(({ confirmPassword, password }, ctx) => {
+      if (confirmPassword !== password) {
         ctx.addIssue({
           code: 'custom',
           message: 'The passwords did not match',
-          path: ['confirm_password'],
+          path: ['confirmPassword'],
         });
       }
     });
@@ -38,7 +38,7 @@ export class AuthenticationValidation {
         ctx.addIssue({
           code: 'custom',
           message: 'The passwords did not match',
-          path: ['confirm_password'],
+          path: ['confirmPassword'],
         });
       }
     });
