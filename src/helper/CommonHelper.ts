@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import { Storage } from '@google-cloud/storage';
+import { v4 as uuid } from 'uuid';
 
 export default class CommonHelper {
   static async generateOneTimePassword(
@@ -13,10 +14,14 @@ export default class CommonHelper {
   static async handleUploadImage(
     cloudStorage: Storage,
     bucketName: string,
-    fileName: string,
+    profileImage: Express.Multer.File,
+    generatedFileName: string,
   ) {
-    await cloudStorage.bucket(bucketName).upload(`profile/${fileName}`, {
-      destination: fileName,
-    });
+    await cloudStorage
+      .bucket(bucketName)
+      .file(`profile/${generatedFileName}`)
+      .save(profileImage.buffer, {
+        contentType: profileImage.mimetype,
+      });
   }
 }
