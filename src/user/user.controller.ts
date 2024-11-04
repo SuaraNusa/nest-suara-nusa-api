@@ -6,8 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  Put,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UserService } from './user.service';
+import { CurrentUser } from '../authentication/decorator/current-user.decorator';
+import { LoggedUserDto } from '../authentication/dto/logged-user.dto';
+import { UpdateUserDto } from './update-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('user')
 export class UserController {
@@ -21,6 +28,16 @@ export class UserController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
+  }
+
+  @Put('')
+  @UseInterceptors(FileInterceptor('profile'))
+  async update(
+    @CurrentUser() loggedUser: LoggedUserDto,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile('profile') profileFile: Express.Multer.File,
+  ) {
+    await this.userService.update(loggedUser, updateUserDto);
   }
 
   @Delete(':id')
