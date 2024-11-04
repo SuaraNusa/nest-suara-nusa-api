@@ -5,6 +5,7 @@ import PrismaService from './prisma.service';
 import ValidationService from './validation.service';
 import { MailerService } from './mailer.service';
 import { ModelRegistryService } from './model-registry.service';
+import { CloudStorageService } from './cloud-storage.service';
 
 @Module({
   imports: [
@@ -29,12 +30,14 @@ import { ModelRegistryService } from './model-registry.service';
     ValidationService,
     MailerService,
     ModelRegistryService,
+    CloudStorageService,
   ],
   exports: [
     PrismaService,
     ValidationService,
     MailerService,
     ModelRegistryService,
+    CloudStorageService,
   ],
 })
 export class CommonModule {}
