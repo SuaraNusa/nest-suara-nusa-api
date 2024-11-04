@@ -9,7 +9,7 @@ export class CloudStorageService {
   private STORAGE: Storage;
 
   async loadCloudStorageInstance(): Promise<Storage> {
-    if (this.STORAGE === null) {
+    if (this.STORAGE === undefined) {
       this.STORAGE = new Storage();
     }
     return this.STORAGE;

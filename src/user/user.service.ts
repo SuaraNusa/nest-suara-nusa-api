@@ -7,7 +7,7 @@ import PrismaService from '../common/prisma.service';
 import { CloudStorageService } from '../common/cloud-storage.service';
 import { UserValidation } from './user.validation';
 import CommonHelper from '../helper/CommonHelper';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -39,6 +39,7 @@ export class UserService {
       UserValidation.UPDATE_USER,
       updateUserDto,
     );
+    const generatedFileName = `${uuidv4()}-${profileImage.originalname}`;
     const cloudStorageInstance =
       await this.cloudStorageService.loadCloudStorageInstance();
     await this.prismaService.$transaction(async (prismaTransaction) => {
@@ -54,11 +55,11 @@ export class UserService {
         .catch(() => {
           throw new NotFoundException('User does not exist');
         });
-      const generatedSingleFileName = `${uuid()}-${profileImage.originalname}`;
       await CommonHelper.handleUploadImage(
         cloudStorageInstance,
         this.configService.get<string>('BUCKET_NAME'),
-        generatedSingleFileName,
+        profileImage,
+        generatedFileName,
       );
       delete validatedUpdatedUserDto['confirmPassword'];
       await prismaTransaction.user.update({
@@ -67,7 +68,7 @@ export class UserService {
         },
         data: {
           ...validatedUpdatedUserDto,
-          photoPath: profileImage,
+          photoPath: generatedFileName,
         },
       });
       return 'Successfully updated user';

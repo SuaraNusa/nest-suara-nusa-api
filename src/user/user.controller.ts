@@ -16,7 +16,7 @@ import { LoggedUserDto } from '../authentication/dto/logged-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -35,7 +35,7 @@ export class UserController {
   async update(
     @CurrentUser() loggedUser: LoggedUserDto,
     @Body() updateUserDto: UpdateUserDto,
-    @UploadedFile('profile') profileFile: Express.Multer.File,
+    @UploadedFile() profileFile: Express.Multer.File,
   ) {
     await this.userService.update(loggedUser, updateUserDto, profileFile);
   }
