@@ -6,6 +6,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
 import { CommonModule } from './common/common.module';
 import { ConfigModule } from '@nestjs/config';
 import { PredictModule } from './predict/predict.module';
+import { QuestionModule } from './question/question.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { PredictModule } from './predict/predict.module';
       isGlobal: true,
     }),
     PredictModule,
+    QuestionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
