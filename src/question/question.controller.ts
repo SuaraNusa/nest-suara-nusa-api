@@ -1,20 +1,43 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  ParseIntPipe,
+  Put,
+} from '@nestjs/common';
 import { QuestionService } from './question.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
+import { WebResponseDto } from '../model/web.response.dto';
+import { VerificationQuestion } from '@prisma/client';
+import { Public } from 'src/authentication/decorator/public.decorator';
 
-@Controller('question')
+@Controller('questions')
 export class QuestionController {
   constructor(private readonly questionService: QuestionService) {}
 
   @Post()
-  create(@Body() createQuestionDto: CreateQuestionDto) {
-    return this.questionService.create(createQuestionDto);
+  async create(
+    @Body() createQuestionDto: CreateQuestionDto,
+  ): Promise<WebResponseDto<boolean>> {
+    return {
+      result: {
+        data: await this.questionService.create(createQuestionDto),
+      },
+    };
   }
 
+  @Public()
   @Get()
-  findAll() {
-    return this.questionService.findAll();
+  async findAll(): Promise<WebResponseDto<VerificationQuestion[]>> {
+    return {
+      result: {
+        data: await this.questionService.findAll(),
+      },
+    };
   }
 
   @Get(':id')
@@ -22,13 +45,24 @@ export class QuestionController {
     return this.questionService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateQuestionDto: UpdateQuestionDto) {
-    return this.questionService.update(+id, updateQuestionDto);
+  @Put(':id')
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateQuestionDto: UpdateQuestionDto,
+  ): Promise<WebResponseDto<boolean>> {
+    return {
+      result: {
+        data: await this.questionService.update(+id, updateQuestionDto),
+      },
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.questionService.remove(+id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return {
+      result: {
+        data: await this.questionService.remove(+id),
+      },
+    };
   }
 }

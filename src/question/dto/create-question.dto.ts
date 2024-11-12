@@ -1,1 +1,3 @@
-export class CreateQuestionDto {}
+export class CreateQuestionDto {
+  question: string;
+}
