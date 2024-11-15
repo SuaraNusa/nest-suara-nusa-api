@@ -7,6 +7,7 @@ import { CommonModule } from './common/common.module';
 import { ConfigModule } from '@nestjs/config';
 import { PredictModule } from './predict/predict.module';
 import { QuestionModule } from './question/question.module';
+import { InstrumentModule } from './instrument/instrument.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { QuestionModule } from './question/question.module';
     }),
     PredictModule,
     QuestionModule,
+    InstrumentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
