@@ -62,3 +62,32 @@ model OneTimePasswordToken {
 
   @@map("one_time_password_tokens")
 }
+
+enum InstrumentCategory {
+  PLUCK
+  BLOWN
+  STRUCK
+  BOWED
+}
+
+model Instrument {
+  id                  BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
+  name                String                @db.VarChar(255)
+  originRegional      String                @map("origin_regional") @db.VarChar(255)
+  instrumentCategory  InstrumentCategory    @map("instrument_category")
+  description         String                @db.Text
+  InstrumentResources InstrumentResources[]
+
+  @@map("instruments")
+}
+
+model InstrumentResources {
+  id           BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
+  imagePath    String?    @map("image_path") @db.VarChar(255)
+  videoUrl     String?    @map("video_url") @db.VarChar(255)
+  audioPath    String     @map("audio_path") @db.VarChar(255)
+  instrument   Instrument @relation(fields: [instrumentId], references: [id])
+  instrumentId BigInt     @map("instrument_id") @db.UnsignedBigInt
+
+  @@map("instrument_resources")
+}
