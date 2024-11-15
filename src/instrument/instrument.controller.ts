@@ -1,19 +1,47 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { InstrumentService } from './instrument.service';
 import { CreateInstrumentDto } from './dto/create-instrument.dto';
 import { UpdateInstrumentDto } from './dto/update-instrument.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('instrument')
 export class InstrumentController {
   constructor(private readonly instrumentService: InstrumentService) {}
 
   @Post()
-  create(@Body() createInstrumentDto: CreateInstrumentDto) {
-    return this.instrumentService.create(createInstrumentDto);
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'images' }, // Menangkap maksimal 5 file pada field "images"
+      { name: 'audios' }, // Menangkap maksimal 3 file pada field "audios"
+    ]),
+  )
+  async create(
+    @Body() createInstrumentDto: CreateInstrumentDto,
+    @UploadedFiles()
+    allFiles: {
+      images?: Express.Multer.File[];
+      audios?: Express.Multer.File[];
+    },
+  ) {
+    return {
+      result: {
+        data: await this.instrumentService.create(createInstrumentDto),
+      },
+    };
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.instrumentService.findAll();
   }
 
@@ -23,7 +51,10 @@ export class InstrumentController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateInstrumentDto: UpdateInstrumentDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateInstrumentDto: UpdateInstrumentDto,
+  ) {
     return this.instrumentService.update(+id, updateInstrumentDto);
   }
 

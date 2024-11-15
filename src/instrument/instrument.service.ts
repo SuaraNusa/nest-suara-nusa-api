@@ -1,10 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { CreateInstrumentDto } from './dto/create-instrument.dto';
 import { UpdateInstrumentDto } from './dto/update-instrument.dto';
+import PrismaService from '../common/prisma.service';
+import ValidationService from '../common/validation.service';
 
 @Injectable()
 export class InstrumentService {
-  create(createInstrumentDto: CreateInstrumentDto) {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly validationService: ValidationService,
+  ) {}
+
+  async create(createInstrumentDto: CreateInstrumentDto) {
     return 'This action adds a new instrument';
   }
 
