@@ -38,7 +38,7 @@ export class AuthenticationService {
       AuthenticationValidation.USER_CREDENTIALS,
       userCredentials,
     );
-    return await this.prismaService.$transaction(async (prismaTransaction) => {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma = await prismaTransaction.user
         .findFirstOrThrow({
           where: {
