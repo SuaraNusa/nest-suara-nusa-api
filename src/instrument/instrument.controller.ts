@@ -20,10 +20,7 @@ export class InstrumentController {
 
   @Post()
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'images' }, // Menangkap maksimal 5 file pada field "images"
-      { name: 'audios' }, // Menangkap maksimal 3 file pada field "audios"
-    ]),
+    FileFieldsInterceptor([{ name: 'images' }, { name: 'audios' }]),
   )
   async create(
     @Body() createInstrumentDto: CreateInstrumentDto,
@@ -35,7 +32,10 @@ export class InstrumentController {
   ) {
     return {
       result: {
-        data: await this.instrumentService.create(createInstrumentDto),
+        data: await this.instrumentService.create(
+          createInstrumentDto,
+          allFiles,
+        ),
       },
     };
   }

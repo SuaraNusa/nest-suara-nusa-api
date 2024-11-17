@@ -3,5 +3,5 @@ export class CreateInstrumentDto {
   originRegional: string;
   instrumentCategory: string;
   description: string;
-  videoUrl: string[];
+  videoUrls: string[];
 }
