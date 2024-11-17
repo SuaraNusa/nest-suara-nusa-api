@@ -121,8 +121,49 @@ export class InstrumentService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} instrument`;
+  async remove(id: number) {
+    this.prismaService.$transaction(async (prismaTransaction) => {
+      await prismaTransaction.instrument
+        .findFirstOrThrow({
+          where: {
+            id,
+          },
+        })
+        .catch(() => {
+          throw new NotFoundException('Instrument not found');
+        });
+      const allInstrumentResources =
+        await prismaTransaction.instrumentResources.findMany({
+          where: {
+            instrumentId: id,
+          },
+        });
+      for (const instrumentResource of allInstrumentResources) {
+        if (instrumentResource.imagePath !== null) {
+          fs.unlinkSync(
+            `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${instrumentResource.imagePath}`,
+          );
+        } else if (instrumentResource.audioPath !== null) {
+          fs.unlinkSync(
+            `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${instrumentResource.audioPath}`,
+          );
+        } else {
+          fs.unlinkSync(
+            `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${instrumentResource.imagePath}`,
+          );
+        }
+      }
+      await prismaTransaction.instrumentResources.deleteMany({
+        where: {
+          instrumentId: id,
+        },
+      });
+      await prismaTransaction.instrument.delete({
+        where: {
+          id,
+        },
+      });
+    });
   }
 
   async generateResourcePayload(

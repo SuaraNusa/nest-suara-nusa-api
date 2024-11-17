@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   UploadedFiles,
@@ -54,15 +55,32 @@ export class InstrumentController {
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'images' }, { name: 'audios' }]),
   )
-  update(
-    @Param('id') id: string,
+  async update(
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateInstrumentDto: UpdateInstrumentDto,
+    @UploadedFiles()
+    allFiles: {
+      images?: Express.Multer.File[];
+      audios?: Express.Multer.File[];
+    },
   ) {
-    return this.instrumentService.update(+id, updateInstrumentDto);
+    return {
+      result: {
+        data: await this.instrumentService.update(
+          id,
+          updateInstrumentDto,
+          allFiles,
+        ),
+      },
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.instrumentService.remove(+id);
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return {
+      result: {
+        data: await this.instrumentService.remove(+id),
+      },
+    };
   }
 }
