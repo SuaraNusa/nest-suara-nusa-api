@@ -85,7 +85,7 @@ model InstrumentResources {
   id           BigInt     @id @default(autoincrement()) @db.UnsignedBigInt
   imagePath    String?    @map("image_path") @db.VarChar(255)
   videoUrl     String?    @map("video_url") @db.VarChar(255)
-  audioPath    String     @map("audio_path") @db.VarChar(255)
+  audioPath    String?    @map("audio_path") @db.VarChar(255)
   instrument   Instrument @relation(fields: [instrumentId], references: [id])
   instrumentId BigInt     @map("instrument_id") @db.UnsignedBigInt
 
