@@ -4,8 +4,8 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
+  Put,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -50,7 +50,10 @@ export class InstrumentController {
     return this.instrumentService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'images' }, { name: 'audios' }]),
+  )
   update(
     @Param('id') id: string,
     @Body() updateInstrumentDto: UpdateInstrumentDto,

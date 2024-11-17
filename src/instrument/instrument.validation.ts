@@ -14,5 +14,13 @@ export class InstrumentValidation {
         InstrumentCategory,
       );
     }),
+    videoUrls: z.array(z.string()),
   });
+
+  static readonly UPDATE: ZodType = z.union([
+    InstrumentValidation.SAVE,
+    z.object({
+      deletedFiles: z.array(z.number()),
+    }),
+  ]);
 }
