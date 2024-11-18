@@ -76,6 +76,7 @@ export class InstrumentService {
       InstrumentValidation.UPDATE,
       updateInstrumentDto,
     );
+    console.log(validatedUpdateInstrumentDto);
     await this.prismaService.$transaction(async (prismaTransaction) => {
       const instrumentPrisma = await prismaTransaction.instrument
         .findFirstOrThrow({
@@ -87,19 +88,43 @@ export class InstrumentService {
           throw new NotFoundException('Instrument not found');
         });
 
-      await prismaTransaction.instrumentResources.deleteMany({
-        where: {
-          id: {
-            in: validatedUpdateInstrumentDto.deletedFiles,
+      if (validatedUpdateInstrumentDto.deletedFiles?.length > 0) {
+        const allDeletedFiles =
+          await prismaTransaction.instrumentResources.findMany({
+            where: {
+              id: {
+                in: validatedUpdateInstrumentDto.deletedFiles,
+              },
+            },
+          });
+        if (
+          allDeletedFiles.length !==
+          validatedUpdateInstrumentDto.deletedFiles.length
+        ) {
+          throw new NotFoundException(`Some resources not found`);
+        }
+        await prismaTransaction.instrumentResources.deleteMany({
+          where: {
+            id: {
+              in: validatedUpdateInstrumentDto.deletedFiles,
+            },
           },
-        },
-      });
-      for (const deletedFile of validatedUpdateInstrumentDto.deletedFiles) {
-        fs.unlinkSync(
-          `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${deletedFile}`,
-        );
+        });
+        for (const deletedFile of allDeletedFiles) {
+          if (deletedFile.imagePath !== null) {
+            fs.unlinkSync(
+              `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${deletedFile.imagePath}`,
+            );
+          } else if (deletedFile.audioPath !== null) {
+            fs.unlinkSync(
+              `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${deletedFile.audioPath}`,
+            );
+          }
+        }
       }
+      delete validatedUpdateInstrumentDto['deletedFiles'];
       const { videoUrls, ...remainderProperty } = validatedUpdateInstrumentDto;
+      console.log(allFiles);
       await prismaTransaction.instrumentResources.createMany({
         data: await this.generateResourcePayload(
           videoUrls,
@@ -145,10 +170,6 @@ export class InstrumentService {
         } else if (instrumentResource.audioPath !== null) {
           fs.unlinkSync(
             `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${instrumentResource.audioPath}`,
-          );
-        } else {
-          fs.unlinkSync(
-            `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${instrumentResource.imagePath}`,
           );
         }
       }

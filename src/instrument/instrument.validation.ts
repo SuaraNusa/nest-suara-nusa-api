@@ -18,10 +18,10 @@ export class InstrumentValidation {
     videoUrls: z.array(z.string()),
   });
 
-  static readonly UPDATE: ZodType = z.union([
+  static readonly UPDATE: ZodType = z.intersection(
     InstrumentValidation.SAVE,
     z.object({
-      deletedFiles: z.array(z.number()),
+      deletedFiles: z.array(z.coerce.number()).optional(), // Optional jika properti ini tidak selalu ada
     }),
-  ]);
+  );
 }
