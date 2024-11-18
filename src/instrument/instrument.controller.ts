@@ -15,7 +15,7 @@ import { CreateInstrumentDto } from './dto/create-instrument.dto';
 import { UpdateInstrumentDto } from './dto/update-instrument.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
-@Controller('instrument')
+@Controller('instruments')
 export class InstrumentController {
   constructor(private readonly instrumentService: InstrumentService) {}
 

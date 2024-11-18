@@ -34,7 +34,6 @@ export class InstrumentService {
         await prismaTransaction.instrument.create({
           data: remainderProperty,
         });
-
       await prismaTransaction.instrumentResources.createMany({
         data: await this.generateResourcePayload(
           videoUrls,
@@ -183,7 +182,7 @@ export class InstrumentService {
       });
     }
     for (const imageFile of allFiles['images']) {
-      const generatedFileName = CommonHelper.handleSaveFileLocally(
+      const generatedFileName = await CommonHelper.handleSaveFileLocally(
         this.configService,
         imageFile,
         'instrument-resources',
@@ -194,7 +193,7 @@ export class InstrumentService {
       });
     }
     for (const audioFile of allFiles['audios']) {
-      const generatedFileName = CommonHelper.handleSaveFileLocally(
+      const generatedFileName = await CommonHelper.handleSaveFileLocally(
         this.configService,
         audioFile,
         'instrument-resources',

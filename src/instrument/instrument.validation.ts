@@ -5,7 +5,7 @@ import { InstrumentCategory } from '@prisma/client';
 export class InstrumentValidation {
   static readonly SAVE: ZodType = z.object({
     name: z.string().min(1),
-    originalRegional: z.string().min(1),
+    originRegional: z.string().min(1),
     instrumentCategory: z.string().transform((arg, ctx) => {
       return ConvertHelper.convertStringIntoEnum(
         arg,
@@ -14,6 +14,7 @@ export class InstrumentValidation {
         InstrumentCategory,
       );
     }),
+    description: z.string(),
     videoUrls: z.array(z.string()),
   });
 
