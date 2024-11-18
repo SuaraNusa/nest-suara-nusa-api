@@ -76,8 +76,7 @@ export class InstrumentService {
       InstrumentValidation.UPDATE,
       updateInstrumentDto,
     );
-    console.log(validatedUpdateInstrumentDto);
-    await this.prismaService.$transaction(async (prismaTransaction) => {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
       const instrumentPrisma = await prismaTransaction.instrument
         .findFirstOrThrow({
           where: {
@@ -146,7 +145,7 @@ export class InstrumentService {
   }
 
   async remove(id: number) {
-    this.prismaService.$transaction(async (prismaTransaction) => {
+    return this.prismaService.$transaction(async (prismaTransaction) => {
       await prismaTransaction.instrument
         .findFirstOrThrow({
           where: {
@@ -183,6 +182,7 @@ export class InstrumentService {
           id,
         },
       });
+      return true;
     });
   }
 
