@@ -34,7 +34,10 @@
 ## Installation
 
 ```bash
+# 
 $ yarn
+$ npx prisma migrate dev
+
 ```
 
 ## Running the app
