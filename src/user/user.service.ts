@@ -60,6 +60,7 @@ export class UserService {
         this.configService.get<string>('BUCKET_NAME'),
         profileImage,
         generatedFileName,
+        'image-resources',
       );
       delete validatedUpdatedUserDto['confirmPassword'];
       await prismaTransaction.user.update({

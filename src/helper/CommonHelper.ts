@@ -20,10 +20,11 @@ export default class CommonHelper {
     bucketName: string,
     profileImage: Express.Multer.File,
     generatedFileName: string,
+    folderName: string,
   ) {
     await cloudStorage
       .bucket(bucketName)
-      .file(`profile/${generatedFileName}`)
+      .file(`${folderName}/${generatedFileName}`)
       .save(profileImage.buffer, {
         contentType: profileImage.mimetype,
       });
@@ -48,5 +49,4 @@ export default class CommonHelper {
     );
     return generatedSingleFileName;
   }
-
 }

@@ -8,6 +8,8 @@ import { Instrument } from '@prisma/client';
 import CommonHelper from '../helper/CommonHelper';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'node:fs';
+import { CloudStorageService } from '../common/cloud-storage.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class InstrumentService {
@@ -15,6 +17,7 @@ export class InstrumentService {
     private readonly prismaService: PrismaService,
     private readonly validationService: ValidationService,
     private readonly configService: ConfigService,
+    private readonly cloudStorageService: CloudStorageService,
   ) {}
 
   async create(
@@ -202,11 +205,16 @@ export class InstrumentService {
         videoUrl,
       });
     }
+    const cloudStorageInstance =
+      await this.cloudStorageService.loadCloudStorageInstance();
     for (const imageFile of allFiles['images']) {
-      const generatedFileName = await CommonHelper.handleSaveFileLocally(
-        this.configService,
+      const generatedFileName = `${uuidv4()}-${imageFile.originalname}`;
+      await CommonHelper.handleUploadImage(
+        cloudStorageInstance,
+        this.configService.get<string>('BUCKET_NAME'),
         imageFile,
-        'instrument-resources',
+        generatedFileName,
+        'image-resources',
       );
       instrumentResourcesPayload.push({
         instrumentId: instrumentPrisma.id,
@@ -214,10 +222,13 @@ export class InstrumentService {
       });
     }
     for (const audioFile of allFiles['audios']) {
-      const generatedFileName = await CommonHelper.handleSaveFileLocally(
-        this.configService,
+      const generatedFileName = `${uuidv4()}-${audioFile.originalname}`;
+      await CommonHelper.handleUploadImage(
+        cloudStorageInstance,
+        this.configService.get<string>('BUCKET_NAME'),
         audioFile,
-        'instrument-resources',
+        generatedFileName,
+        'audio-resources',
       );
       instrumentResourcesPayload.push({
         instrumentId: instrumentPrisma.id,
