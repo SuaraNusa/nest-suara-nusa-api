@@ -1,12 +1,12 @@
 import * as nodeMailer from 'nodemailer';
+import { SentMessageInfo, Transporter } from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
 import { EmailTransfer } from '../model/email.transfer';
 import Mail from 'nodemailer/lib/mailer';
-import { SentMessageInfo, Transporter } from 'nodemailer';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
-export class MailerService {
+export class MailerCustomService {
   constructor(private readonly configService: ConfigService) {}
 
   private nodeMailerTransporter: Transporter<SentMessageInfo>;
