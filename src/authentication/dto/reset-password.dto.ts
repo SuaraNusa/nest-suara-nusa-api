@@ -1,4 +1,5 @@
-export class ResetPasswordDto {
-  newPassword: string;
-  confirmationNewPassword: string;
+export class ResetPassword {
+  email: string;
+  password: string;
+  confirmPassword: string;
 }

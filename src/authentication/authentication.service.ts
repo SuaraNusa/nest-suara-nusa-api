@@ -3,7 +3,6 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { UserCredentialDto } from './dto/user-credential.dto';
 import { ConfigService } from '@nestjs/config';
@@ -19,8 +18,9 @@ import { MailerCustomService } from '../common/mailer.service';
 import { AuthenticationTokenDto } from './dto/authentication-token.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { ResetPasswordDto } from './dto/reset-password.dto';
 import { MailerService } from '@nestjs-modules/mailer';
+import { VerifyTokenDto } from './dto/verify-token.dto';
+import { ResetPassword } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthenticationService {
@@ -77,26 +77,26 @@ export class AuthenticationService {
     };
   }
 
-  async generateOneTimePasswordVerification(
-    currentUser: LoggedUserDto,
-  ): Promise<string> {
+  async generateOneTimePasswordVerification(currentUser: {
+    email: string;
+  }): Promise<string> {
     const generatedOneTimePassword = await this.prismaService.$transaction(
       async (prismaTransaction) => {
+        const userPrisma: User = await prismaTransaction.user
+          .findFirstOrThrow({
+            where: {
+              email: currentUser.email,
+            },
+          })
+          .catch(() => {
+            throw new NotFoundException('User with this email not found');
+          });
         const generatedOneTimePassword =
           await CommonHelper.generateOneTimePassword();
         const hashedGeneratedOneTimePassword = await bcrypt.hash(
           generatedOneTimePassword,
           10,
         );
-        const userPrisma: User = await prismaTransaction.user
-          .findFirstOrThrow({
-            where: {
-              uniqueId: currentUser['uniqueId'],
-            },
-          })
-          .catch(() => {
-            throw new UnauthorizedException(`User not found`);
-          });
         await prismaTransaction.oneTimePasswordToken.create({
           data: {
             userId: userPrisma['id'],
@@ -107,16 +107,6 @@ export class AuthenticationService {
         return generatedOneTimePassword;
       },
     );
-    // await this.mailerCustomService.dispatchMailTransfer({
-    //   recipients: [
-    //     {
-    //       name: currentUser['name'],
-    //       address: currentUser['email'],
-    //     },
-    //   ],
-    //   subject: 'One Time Password Verification',
-    //   text: `Bang! ini kode OTP nya: ${generatedOneTimePassword}`,
-    // });
     await this.mailerService.sendMail({
       from: this.configService.get<string>('EMAIL_USERNAME'),
       to: currentUser['email'],
@@ -127,18 +117,17 @@ export class AuthenticationService {
   }
 
   async verifyOneTimePasswordToken(
-    currentUser: LoggedUserDto,
-    oneTimePassword: string,
-  ): Promise<string> {
+    verifyToken: VerifyTokenDto,
+  ): Promise<boolean> {
     return this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma: User = await prismaTransaction.user
-        .findFirst({
+        .findFirstOrThrow({
           where: {
-            uniqueId: currentUser['uniqueId'],
+            email: verifyToken.email,
           },
         })
         .catch(() => {
-          throw new UnauthorizedException(`User not found`);
+          throw new NotFoundException('User not found');
         });
       const validOneTimePasswordToken: OneTimePasswordToken =
         await prismaTransaction.oneTimePasswordToken.findFirstOrThrow({
@@ -148,26 +137,17 @@ export class AuthenticationService {
               gte: new Date(),
             },
           },
+          orderBy: {
+            id: 'desc',
+          },
         });
-      if (
+      return !!(
         validOneTimePasswordToken &&
         (await bcrypt.compare(
-          oneTimePassword,
+          verifyToken.token,
           validOneTimePasswordToken.hashedToken,
         ))
-      ) {
-        await prismaTransaction.user.update({
-          where: {
-            id: userPrisma.id,
-          },
-          data: {
-            emailVerifiedAt: new Date(),
-          },
-        });
-        return 'One time password verified';
-      } else {
-        return 'One time password not valid';
-      }
+      );
     });
   }
 
@@ -255,36 +235,32 @@ export class AuthenticationService {
     });
   }
 
-  async handleResetPassword(
-    loggedUser: LoggedUserDto,
-    resetPassword: ResetPasswordDto,
-  ) {
-    const validatedResetPassword = this.validationService.validate(
+  async handleResetPassword(resetPassword: ResetPassword) {
+    const validatedResetPasswordDto = this.validationService.validate(
       AuthenticationValidation.RESET_PASSWORD,
       resetPassword,
     );
-    return this.prismaService.$transaction(async (prismaTransaction) => {
-      const { id: userId } = await prismaTransaction.user
-        .findFirstOrThrow({
-          where: {
-            uniqueId: loggedUser.uniqueId,
-          },
-          select: {
-            id: true,
-          },
-        })
-        .catch(() => {
-          throw new NotFoundException('User not found');
-        });
-      await prismaTransaction.user.update({
+    this.prismaService.user
+      .findFirstOrThrow({
         where: {
-          id: userId,
+          email: validatedResetPasswordDto.email,
         },
-        data: {
-          password: validatedResetPassword.newPassword,
-        },
+      })
+      .catch(() => {
+        throw new NotFoundException('User not found');
       });
-      return 'User has successfully change password';
+    const hashedGeneratedOneTimePassword = await bcrypt.hash(
+      validatedResetPasswordDto.newPassword,
+      10,
+    );
+    await this.prismaService.user.updateMany({
+      where: {
+        email: validatedResetPasswordDto.email,
+      },
+      data: {
+        password: hashedGeneratedOneTimePassword,
+      },
     });
+    return true;
   }
 }

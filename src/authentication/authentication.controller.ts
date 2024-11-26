@@ -1,11 +1,11 @@
 import {
+  Body,
   Controller,
   Get,
-  UseGuards,
+  HttpException,
   Post,
   Request,
-  HttpException,
-  Body,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
@@ -18,12 +18,11 @@ import { Public } from './decorator/public.decorator';
 import { SignUpDto } from './dto/sign-up.dto';
 import { NoVerifiedEmail } from './decorator/no-verified-email.decorator';
 import { VerifyTokenDto } from './dto/verify-token.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ApiCreatedResponse } from '@nestjs/swagger';
 import {
   ApiErrorResponseStringCustom,
   ApiOkResponseCustom,
 } from '../helper/ResponseHelper';
+import { ResetPassword } from './dto/reset-password.dto';
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -68,49 +67,40 @@ export class AuthenticationController {
     };
   }
 
-  @NoVerifiedEmail()
-  @Get('generate-otp')
-  @ApiCreatedResponse({
-    description: 'The OTP has been successfully sent',
-    type: 'Successfully send one time password',
-  })
+  @Public()
+  @Post('generate-otp')
   async generateOneTimePasswordVerification(
-    @CurrentUser() currentUser: LoggedUserDto,
+    @Body() emailUser: { email: string },
   ): Promise<WebResponseDto<string>> {
     return {
       result: {
         data: await this.authenticationService.generateOneTimePasswordVerification(
-          currentUser,
+          emailUser,
         ),
       },
     };
   }
 
-  @NoVerifiedEmail()
+  @Public()
   @Post('verify-otp')
   async verifyOneTimePasswordVerification(
-    @CurrentUser() loggedUser: LoggedUserDto,
-    verifyToken: VerifyTokenDto,
-  ): Promise<WebResponseDto<string>> {
+    @Body() verifyToken: VerifyTokenDto,
+  ): Promise<WebResponseDto<boolean>> {
     return {
       result: {
         data: await this.authenticationService.verifyOneTimePasswordToken(
-          loggedUser,
-          verifyToken.token,
+          verifyToken,
         ),
       },
     };
   }
 
+  @Public()
   @Post('reset-password')
-  async resetPassword(
-    @CurrentUser() loggedUser: LoggedUserDto,
-    resetPassword: ResetPasswordDto,
-  ) {
+  async resetPassword(@Body() resetPassword: ResetPassword) {
     return {
       result: {
         data: await this.authenticationService.handleResetPassword(
-          loggedUser,
           resetPassword,
         ),
       },
