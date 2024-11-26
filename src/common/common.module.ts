@@ -3,9 +3,11 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import PrismaService from './prisma.service';
 import ValidationService from './validation.service';
-import { MailerService } from './mailer.service';
+import { MailerCustomService } from './mailer.service';
 import { ModelRegistryService } from './model-registry.service';
 import { CloudStorageService } from './cloud-storage.service';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -24,18 +26,34 @@ import { CloudStorageService } from './cloud-storage.service';
         }),
       ],
     }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule], // Import ConfigModule
+      inject: [ConfigService], // Inject ConfigService
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true, // use SSL
+          service: configService.get<string>('EMAIL_HOST'),
+          auth: {
+            user: configService.get<string>('EMAIL_USERNAME'),
+            pass: configService.get<string>('EMAIL_PASSWORD'),
+          },
+        },
+      }),
+    }),
   ],
   providers: [
     PrismaService,
     ValidationService,
-    MailerService,
+    MailerCustomService,
     ModelRegistryService,
     CloudStorageService,
   ],
   exports: [
     PrismaService,
     ValidationService,
-    MailerService,
+    MailerCustomService,
     ModelRegistryService,
     CloudStorageService,
   ],
