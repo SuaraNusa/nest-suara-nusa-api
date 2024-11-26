@@ -15,11 +15,12 @@ import { LoggedUserDto } from './dto/logged-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import CommonHelper from '../helper/CommonHelper';
 import { OneTimePasswordToken, User } from '@prisma/client';
-import { MailerService } from '../common/mailer.service';
+import { MailerCustomService } from '../common/mailer.service';
 import { AuthenticationTokenDto } from './dto/authentication-token.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthenticationService {
@@ -28,6 +29,7 @@ export class AuthenticationService {
     private readonly prismaService: PrismaService,
     private readonly validationService: ValidationService,
     private readonly jwtService: JwtService,
+    private readonly mailerCustomService: MailerCustomService,
     private readonly mailerService: MailerService,
   ) {}
 
@@ -105,13 +107,19 @@ export class AuthenticationService {
         return generatedOneTimePassword;
       },
     );
-    await this.mailerService.dispatchMailTransfer({
-      recipients: [
-        {
-          name: currentUser['name'],
-          address: currentUser['email'],
-        },
-      ],
+    // await this.mailerCustomService.dispatchMailTransfer({
+    //   recipients: [
+    //     {
+    //       name: currentUser['name'],
+    //       address: currentUser['email'],
+    //     },
+    //   ],
+    //   subject: 'One Time Password Verification',
+    //   text: `Bang! ini kode OTP nya: ${generatedOneTimePassword}`,
+    // });
+    await this.mailerService.sendMail({
+      from: this.configService.get<string>('EMAIL_USERNAME'),
+      to: currentUser['email'],
       subject: 'One Time Password Verification',
       text: `Bang! ini kode OTP nya: ${generatedOneTimePassword}`,
     });
