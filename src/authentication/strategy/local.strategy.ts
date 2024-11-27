@@ -1,10 +1,10 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { AuthenticationService } from '../authentication.service';
 import { UserCredentialDto } from '../dto/user-credential.dto';
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { LoggedUserDto } from '../dto/logged-user.dto';
-import { Logger, loggers } from 'winston';
+import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @Injectable()
@@ -27,7 +27,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const loggedUser: LoggedUserDto =
       await this.authenticationService.validateUserCredentials(userCredentials);
     if (!loggedUser) {
-      throw new UnauthorizedException('Credentials not valid');
+      throw new HttpException('Credentials not valid', 401);
     }
     return loggedUser;
   }
