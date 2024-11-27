@@ -84,7 +84,7 @@ export class AuthenticationService {
             },
           })
           .catch(() => {
-            throw new HttpException('User with this email not found', 400);
+            throw new HttpException('User with this email not found', 404);
           });
         const generatedOneTimePassword =
           await CommonHelper.generateOneTimePassword();
@@ -122,7 +122,7 @@ export class AuthenticationService {
           },
         })
         .catch(() => {
-          throw new HttpException('User not found', 400);
+          throw new HttpException('User not found', 404);
         });
       const validOneTimePasswordToken: OneTimePasswordToken =
         await prismaTransaction.oneTimePasswordToken.findFirstOrThrow({
@@ -242,7 +242,7 @@ export class AuthenticationService {
         },
       })
       .catch(() => {
-        throw new HttpException('User not found', 400);
+        throw new HttpException('User not found', 404);
       });
     const hashedGeneratedOneTimePassword = await bcrypt.hash(
       validatedResetPasswordDto.newPassword,

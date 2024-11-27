@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import PrismaService from '../common/prisma.service';
@@ -51,7 +51,7 @@ export class QuestionService {
           },
         })
         .catch(() => {
-          throw new NotFoundException('Verification Question not found');
+          throw new HttpException('Verification Question not found', 404);
         });
       await prismaTransaction.verificationQuestion.update({
         where: {
@@ -72,7 +72,7 @@ export class QuestionService {
           },
         })
         .catch(() => {
-          throw new NotFoundException('Verification Question not found');
+          throw new HttpException('Verification Question not found', 404);
         });
       await prismaTransaction.verificationQuestion.delete({
         where: {
