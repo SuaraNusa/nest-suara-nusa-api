@@ -36,7 +36,7 @@ async function bootstrap() {
   };
   app.enableCors();
 
-  const port = process.env.PORT || 8080; // Jika PORT tidak disetel, gunakan 3000
+  const port = process.env.PORT || 8080; // Jika PORT tidak disetel, gunakan 8080
   await app.listen(port);
 }
 
