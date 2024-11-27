@@ -27,7 +27,6 @@ export class AuthenticationController {
   @UseGuards(LocalAuthGuard)
   @NoVerifiedEmail()
   @Post('login')
-
   async signIn(@CurrentUser() loggedUser: LoggedUserDto) {
     return this.authenticationService.signAccessToken(loggedUser);
   }
