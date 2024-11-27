@@ -1,12 +1,11 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { NoVerifiedEmailGuard } from './authentication/guard/no-verified-email.guard';
-import PrismaService from './common/prisma.service';
 import * as fs from 'node:fs';
 import PrismaExceptionFilter from './exception/PrismaExceptionFilter';
 import ValidationExceptionFilter from './exception/ValidationExceptionFilter';
 import MulterExceptionFilter from './exception/MulterExceptionFilter';
+import { TransformResponseInterceptor } from "./model/transform-response.interceptor";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -35,8 +34,9 @@ async function bootstrap() {
     return bigInt ?? this.toString();
   };
   app.enableCors();
+  app.useGlobalInterceptors(new TransformResponseInterceptor());
 
-  const port = process.env.PORT || 8080; // Jika PORT tidak disetel, gunakan 8080
+  const port = process.env.PORT || 3000; // Jika PORT tidak disetel, gunakan 8080
   await app.listen(port);
 }
 
