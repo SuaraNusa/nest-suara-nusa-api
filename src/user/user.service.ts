@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { LoggedUserDto } from '../authentication/dto/logged-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { ConfigService } from '@nestjs/config';
@@ -53,7 +53,7 @@ export class UserService {
           },
         })
         .catch(() => {
-          throw new NotFoundException('User does not exist');
+          throw new HttpException('User does not exist', 400);
         });
       await CommonHelper.handleUploadImage(
         cloudStorageInstance,

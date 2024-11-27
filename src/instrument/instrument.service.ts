@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateInstrumentDto } from './dto/create-instrument.dto';
 import { UpdateInstrumentDto } from './dto/update-instrument.dto';
 import PrismaService from '../common/prisma.service';
@@ -87,7 +87,7 @@ export class InstrumentService {
           },
         })
         .catch(() => {
-          throw new NotFoundException('Instrument not found');
+          throw new HttpException('Instrument not found', 404);
         });
 
       if (validatedUpdateInstrumentDto.deletedFiles?.length > 0) {
@@ -103,7 +103,7 @@ export class InstrumentService {
           allDeletedFiles.length !==
           validatedUpdateInstrumentDto.deletedFiles.length
         ) {
-          throw new NotFoundException(`Some resources not found`);
+          throw new HttpException(`Some resources not found`, 404);
         }
         await prismaTransaction.instrumentResources.deleteMany({
           where: {
@@ -156,7 +156,7 @@ export class InstrumentService {
           },
         })
         .catch(() => {
-          throw new NotFoundException('Instrument not found');
+          throw new HttpException('Instrument not found', 404);
         });
       const allInstrumentResources =
         await prismaTransaction.instrumentResources.findMany({
