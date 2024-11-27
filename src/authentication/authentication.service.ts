@@ -1,9 +1,4 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserCredentialDto } from './dto/user-credential.dto';
 import { ConfigService } from '@nestjs/config';
 import PrismaService from '../common/prisma.service';
@@ -89,7 +84,7 @@ export class AuthenticationService {
             },
           })
           .catch(() => {
-            throw new NotFoundException('User with this email not found');
+            throw new HttpException('User with this email not found', 400);
           });
         const generatedOneTimePassword =
           await CommonHelper.generateOneTimePassword();
@@ -127,7 +122,7 @@ export class AuthenticationService {
           },
         })
         .catch(() => {
-          throw new NotFoundException('User not found');
+          throw new HttpException('User not found', 400);
         });
       const validOneTimePasswordToken: OneTimePasswordToken =
         await prismaTransaction.oneTimePasswordToken.findFirstOrThrow({
@@ -247,7 +242,7 @@ export class AuthenticationService {
         },
       })
       .catch(() => {
-        throw new NotFoundException('User not found');
+        throw new HttpException('User not found', 400);
       });
     const hashedGeneratedOneTimePassword = await bcrypt.hash(
       validatedResetPasswordDto.newPassword,
