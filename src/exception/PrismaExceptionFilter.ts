@@ -1,4 +1,9 @@
-import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 
@@ -13,6 +18,7 @@ export default class PrismaExceptionFilter
     const http = host.switchToHttp();
     const response = http.getResponse<Response>();
     const webResponse: WebResponseDto<string> = new WebResponseDto();
+    let statusCode = 400;
     switch (exception.code) {
       case 'P2002':
         webResponse.errors.code = 'P2002';
@@ -22,13 +28,12 @@ export default class PrismaExceptionFilter
       case 'P2003':
         webResponse.errors.code = 'P2003';
         webResponse.errors.message = `Foreign key constraint failed: ${exception.meta.target as string}`;
-        response.status(400).json(webResponse);
         break;
       default:
         // handling all other errors
         webResponse.errors.message = `Something went wrong: ${exception.message}`;
-        response.status(500).json(webResponse);
-        break;
+        statusCode = 500;
     }
+    throw new HttpException(webResponse.errors.message, statusCode);
   }
 }
