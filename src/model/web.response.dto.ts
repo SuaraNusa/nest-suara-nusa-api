@@ -6,7 +6,6 @@ export class ErrorResponse<T> {
 }
 
 export class WebResponseDto<T> {
-  @ApiProperty({ type: () => Object, nullable: true })
   status?: string;
   data?: T;
   @ApiProperty({ type: () => Object, nullable: true })
@@ -14,6 +13,7 @@ export class WebResponseDto<T> {
 
   constructor() {
     this.status = 'success';
+    this.data = null;
     this.errors = {
       code: null,
       message: null,
