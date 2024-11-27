@@ -18,7 +18,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Cek jika exception adalah ZodError
     if (exception instanceof ZodError) {
       status = HttpStatus.BAD_REQUEST; // Misalnya, 400 untuk ZodError
-      message = exception.issues; // Ambil issues dari ZodError
+      message = exception.issues[0].message; // Ambil issues dari ZodError
     } else if (exception instanceof HttpException) {
       // Cek jika exception adalah HttpException
       status = exception.getStatus();
