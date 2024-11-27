@@ -5,7 +5,8 @@ import * as fs from 'node:fs';
 import PrismaExceptionFilter from './exception/PrismaExceptionFilter';
 import ValidationExceptionFilter from './exception/ValidationExceptionFilter';
 import MulterExceptionFilter from './exception/MulterExceptionFilter';
-import { TransformResponseInterceptor } from "./model/transform-response.interceptor";
+import { TransformResponseInterceptor } from './model/transform-response.interceptor';
+import { AllExceptionsFilter } from './model/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -35,6 +36,7 @@ async function bootstrap() {
   };
   app.enableCors();
   app.useGlobalInterceptors(new TransformResponseInterceptor());
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   const port = process.env.PORT || 3000; // Jika PORT tidak disetel, gunakan 8080
   await app.listen(port);
