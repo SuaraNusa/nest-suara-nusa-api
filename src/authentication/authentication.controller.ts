@@ -12,7 +12,6 @@ import { LocalAuthGuard } from './guard/local-auth.guard';
 import { LoggedUserDto } from './dto/logged-user.dto';
 import { WebResponseDto } from '../model/web.response.dto';
 import { CurrentUser } from './decorator/current-user.decorator';
-import { AuthenticationTokenDto } from './dto/authentication-token.dto';
 import { GoogleOAuthGuard } from './guard/google-auth.guard';
 import { Public } from './decorator/public.decorator';
 import { SignUpDto } from './dto/sign-up.dto';
@@ -28,12 +27,9 @@ export class AuthenticationController {
   @UseGuards(LocalAuthGuard)
   @NoVerifiedEmail()
   @Post('login')
-  async signIn(
-    @CurrentUser() loggedUser: LoggedUserDto,
-  ): Promise<WebResponseDto<AuthenticationTokenDto>> {
-    return {
-      data: await this.authenticationService.signAccessToken(loggedUser),
-    };
+
+  async signIn(@CurrentUser() loggedUser: LoggedUserDto) {
+    return this.authenticationService.signAccessToken(loggedUser);
   }
 
   @UseGuards(LocalAuthGuard)
