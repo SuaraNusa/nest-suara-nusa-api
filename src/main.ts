@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as fs from 'node:fs';
 import PrismaExceptionFilter from './exception/PrismaExceptionFilter';
-import ValidationExceptionFilter from './exception/ValidationExceptionFilter';
 import MulterExceptionFilter from './exception/MulterExceptionFilter';
 import { TransformResponseInterceptor } from './model/transform-response.interceptor';
 import { AllExceptionsFilter } from './model/all-exceptions.filter';
@@ -22,7 +21,6 @@ async function bootstrap() {
 
   // Exception Filter
   app.useGlobalFilters(new PrismaExceptionFilter());
-  app.useGlobalFilters(new ValidationExceptionFilter());
   app.useGlobalFilters(new MulterExceptionFilter());
 
   // Global Guards
