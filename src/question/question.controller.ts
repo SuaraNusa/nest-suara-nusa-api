@@ -1,11 +1,11 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
   ParseIntPipe,
+  Post,
   Put,
 } from '@nestjs/common';
 import { QuestionService } from './question.service';
@@ -24,9 +24,7 @@ export class QuestionController {
     @Body() createQuestionDto: CreateQuestionDto,
   ): Promise<WebResponseDto<boolean>> {
     return {
-      result: {
-        data: await this.questionService.create(createQuestionDto),
-      },
+      data: await this.questionService.create(createQuestionDto),
     };
   }
 
@@ -34,9 +32,7 @@ export class QuestionController {
   @Get()
   async findAll(): Promise<WebResponseDto<VerificationQuestion[]>> {
     return {
-      result: {
-        data: await this.questionService.findAll(),
-      },
+      data: await this.questionService.findAll(),
     };
   }
 
@@ -51,18 +47,14 @@ export class QuestionController {
     @Body() updateQuestionDto: UpdateQuestionDto,
   ): Promise<WebResponseDto<boolean>> {
     return {
-      result: {
-        data: await this.questionService.update(+id, updateQuestionDto),
-      },
+      data: await this.questionService.update(+id, updateQuestionDto),
     };
   }
 
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     return {
-      result: {
-        data: await this.questionService.remove(+id),
-      },
+      data: await this.questionService.remove(+id),
     };
   }
 }

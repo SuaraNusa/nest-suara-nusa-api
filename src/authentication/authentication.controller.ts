@@ -18,10 +18,6 @@ import { Public } from './decorator/public.decorator';
 import { SignUpDto } from './dto/sign-up.dto';
 import { NoVerifiedEmail } from './decorator/no-verified-email.decorator';
 import { VerifyTokenDto } from './dto/verify-token.dto';
-import {
-  ApiErrorResponseStringCustom,
-  ApiOkResponseCustom,
-} from '../helper/ResponseHelper';
 import { ResetPassword } from './dto/reset-password.dto';
 
 @Controller('authentication')
@@ -32,18 +28,11 @@ export class AuthenticationController {
   @UseGuards(LocalAuthGuard)
   @NoVerifiedEmail()
   @Post('login')
-  @ApiOkResponseCustom(AuthenticationTokenDto)
-  @ApiErrorResponseStringCustom(
-    'Returns "Credentials not valid" if authentication fails',
-    400,
-  ) // Dokumentasi respons kesalahan
   async signIn(
     @CurrentUser() loggedUser: LoggedUserDto,
   ): Promise<WebResponseDto<AuthenticationTokenDto>> {
     return {
-      result: {
-        data: await this.authenticationService.signAccessToken(loggedUser),
-      },
+      data: await this.authenticationService.signAccessToken(loggedUser),
     };
   }
 
@@ -61,9 +50,7 @@ export class AuthenticationController {
   @Post('register')
   async signUp(@Body() signUpDto: SignUpDto): Promise<WebResponseDto<string>> {
     return {
-      result: {
-        data: await this.authenticationService.signUp(signUpDto),
-      },
+      data: await this.authenticationService.signUp(signUpDto),
     };
   }
 
@@ -73,11 +60,9 @@ export class AuthenticationController {
     @Body() emailUser: { email: string },
   ): Promise<WebResponseDto<string>> {
     return {
-      result: {
-        data: await this.authenticationService.generateOneTimePasswordVerification(
-          emailUser,
-        ),
-      },
+      data: await this.authenticationService.generateOneTimePasswordVerification(
+        emailUser,
+      ),
     };
   }
 
@@ -87,11 +72,9 @@ export class AuthenticationController {
     @Body() verifyToken: VerifyTokenDto,
   ): Promise<WebResponseDto<boolean>> {
     return {
-      result: {
-        data: await this.authenticationService.verifyOneTimePasswordToken(
-          verifyToken,
-        ),
-      },
+      data: await this.authenticationService.verifyOneTimePasswordToken(
+        verifyToken,
+      ),
     };
   }
 

@@ -32,12 +32,7 @@ export class InstrumentController {
     },
   ) {
     return {
-      result: {
-        data: await this.instrumentService.create(
-          createInstrumentDto,
-          allFiles,
-        ),
-      },
+      data: await this.instrumentService.create(createInstrumentDto, allFiles),
     };
   }
 
@@ -65,22 +60,18 @@ export class InstrumentController {
     },
   ) {
     return {
-      result: {
-        data: await this.instrumentService.update(
-          id,
-          updateInstrumentDto,
-          allFiles,
-        ),
-      },
+      data: await this.instrumentService.update(
+        id,
+        updateInstrumentDto,
+        allFiles,
+      ),
     };
   }
 
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     return {
-      result: {
-        data: await this.instrumentService.remove(+id),
-      },
+      data: await this.instrumentService.remove(+id),
     };
   }
 }
