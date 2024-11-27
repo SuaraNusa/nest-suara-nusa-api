@@ -5,22 +5,31 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { ZodError } from 'zod';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
-    const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+    let status: HttpStatus;
+    let message: string | object;
 
-    const message =
-      exception instanceof HttpException
-        ? exception.getResponse()
-        : 'Internal server error';
+    // Cek jika exception adalah ZodError
+    if (exception instanceof ZodError) {
+      status = HttpStatus.BAD_REQUEST; // Misalnya, 400 untuk ZodError
+      message = exception.issues; // Ambil issues dari ZodError
+    } else if (exception instanceof HttpException) {
+      // Cek jika exception adalah HttpException
+      status = exception.getStatus();
+      message = exception.getResponse();
+    } else {
+      // Default, jika bukan ZodError atau HttpException
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      message = 'Internal server error';
+    }
 
+    // Menangani response
     response.status(status).json({
       status: status >= 200 && status < 400 ? 'success' : 'error',
       data: null,
