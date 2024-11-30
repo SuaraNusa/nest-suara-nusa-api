@@ -10,7 +10,6 @@ import {
 import { AuthenticationService } from './authentication.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
 import { LoggedUserDto } from './dto/logged-user.dto';
-import { WebResponseDto } from '../model/web.response.dto';
 import { CurrentUser } from './decorator/current-user.decorator';
 import { GoogleOAuthGuard } from './guard/google-auth.guard';
 import { Public } from './decorator/public.decorator';
@@ -43,46 +42,32 @@ export class AuthenticationController {
 
   @Public()
   @Post('register')
-  async signUp(@Body() signUpDto: SignUpDto): Promise<WebResponseDto<string>> {
-    return {
-      data: await this.authenticationService.signUp(signUpDto),
-    };
+  async signUp(@Body() signUpDto: SignUpDto): Promise<string> {
+    return this.authenticationService.signUp(signUpDto);
   }
 
   @Public()
   @Post('generate-otp')
   async generateOneTimePasswordVerification(
     @Body() emailUser: { email: string },
-  ): Promise<WebResponseDto<string>> {
-    return {
-      data: await this.authenticationService.generateOneTimePasswordVerification(
-        emailUser,
-      ),
-    };
+  ): Promise<string> {
+    return this.authenticationService.generateOneTimePasswordVerification(
+      emailUser,
+    );
   }
 
   @Public()
   @Post('verify-otp')
   async verifyOneTimePasswordVerification(
     @Body() verifyToken: VerifyTokenDto,
-  ): Promise<WebResponseDto<boolean>> {
-    return {
-      data: await this.authenticationService.verifyOneTimePasswordToken(
-        verifyToken,
-      ),
-    };
+  ): Promise<boolean> {
+    return this.authenticationService.verifyOneTimePasswordToken(verifyToken);
   }
 
   @Public()
   @Post('reset-password')
   async resetPassword(@Body() resetPassword: ResetPassword) {
-    return {
-      result: {
-        data: await this.authenticationService.handleResetPassword(
-          resetPassword,
-        ),
-      },
-    };
+    return this.authenticationService.handleResetPassword(resetPassword);
   }
 
   @Public()
@@ -99,3 +84,4 @@ export class AuthenticationController {
     return this.authenticationService.handleGoogleLogin(expressRequest);
   }
 }
+// please add documentation for this request, add example of request and response

@@ -10,7 +10,6 @@ import { JwtService } from '@nestjs/jwt';
 import CommonHelper from '../helper/CommonHelper';
 import { OneTimePasswordToken, User } from '@prisma/client';
 import { MailerCustomService } from '../common/mailer.service';
-import { AuthenticationTokenDto } from './dto/authentication-token.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -63,13 +62,8 @@ export class AuthenticationService {
     });
   }
 
-  async signAccessToken(
-    loggedUser: LoggedUserDto,
-  ): Promise<AuthenticationTokenDto> {
-    return {
-      accessToken: await this.jwtService.signAsync(loggedUser),
-      refreshToken: null,
-    };
+  async signAccessToken(loggedUser: LoggedUserDto): Promise<string> {
+    return this.jwtService.signAsync(loggedUser);
   }
 
   async generateOneTimePasswordVerification(currentUser: {
@@ -208,18 +202,35 @@ export class AuthenticationService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
+
       delete validatedSignUpRequest['confirmPassword'];
       const {
-        verificationQuestions: verificationQuestion,
+        verificationQuestions: verificationQuestions,
         ...remainderProperty
       } = validatedSignUpRequest;
+      const allVerificationQuestionId = verificationQuestions.map((val) => {
+        return val.verificationQuestionId;
+      });
+      console.log(allVerificationQuestionId);
+      const allVerificationQuestion =
+        await prismaTransaction.verificationQuestion.findMany({
+          where: {
+            id: {
+              in: allVerificationQuestionId,
+            },
+          },
+        });
+      console.log(allVerificationQuestion, verificationQuestions);
+      if (allVerificationQuestion.length !== verificationQuestions.length) {
+        throw new HttpException('Some verification question not found', 404);
+      }
       await prismaTransaction.user.create({
         data: {
           ...remainderProperty,
           password: hashedPassword,
           uniqueId: uuidv4(),
           UserVerificationQuestion: {
-            create: verificationQuestion,
+            create: verificationQuestions,
           },
         },
         include: {
