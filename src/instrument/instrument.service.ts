@@ -31,21 +31,28 @@ export class InstrumentService {
       InstrumentValidation.SAVE,
       createInstrumentDto,
     );
-    return this.prismaService.$transaction(async (prismaTransaction) => {
-      const { videoUrls, ...remainderProperty } = validatedCreateInstrumentDto;
-      const instrumentPrisma: Instrument =
-        await prismaTransaction.instrument.create({
-          data: remainderProperty,
-        });
-      await prismaTransaction.instrumentResources.createMany({
-        data: await this.generateResourcePayload(
+    return this.prismaService.$transaction(
+      async (prismaTransaction) => {
+        const { videoUrls, ...remainderProperty } =
+          validatedCreateInstrumentDto;
+        const instrumentPrisma: Instrument =
+          await prismaTransaction.instrument.create({
+            data: remainderProperty,
+          });
+        const allResourcePayload = await this.generateResourcePayload(
           videoUrls,
           instrumentPrisma,
           allFiles,
-        ),
-      });
-      return true;
-    });
+        );
+        await prismaTransaction.instrumentResources.createMany({
+          data: allResourcePayload,
+        });
+        return true;
+      },
+      {
+        timeout: 20000,
+      },
+    );
   }
 
   async findAll() {
@@ -79,72 +86,82 @@ export class InstrumentService {
       InstrumentValidation.UPDATE,
       updateInstrumentDto,
     );
-    return this.prismaService.$transaction(async (prismaTransaction) => {
-      const instrumentPrisma = await prismaTransaction.instrument
-        .findFirstOrThrow({
-          where: {
-            id,
-          },
-        })
-        .catch(() => {
-          throw new HttpException('Instrument not found', 404);
-        });
+    return this.prismaService.$transaction(
+      async (prismaTransaction) => {
+        const instrumentPrisma = await prismaTransaction.instrument
+          .findFirstOrThrow({
+            where: {
+              id,
+            },
+          })
+          .catch(() => {
+            throw new HttpException('Instrument not found', 404);
+          });
 
-      if (validatedUpdateInstrumentDto.deletedFiles?.length > 0) {
-        const allDeletedFiles =
-          await prismaTransaction.instrumentResources.findMany({
+        if (validatedUpdateInstrumentDto.deletedFiles?.length > 0) {
+          const allDeletedFiles =
+            await prismaTransaction.instrumentResources.findMany({
+              where: {
+                id: {
+                  in: validatedUpdateInstrumentDto.deletedFiles,
+                },
+              },
+            });
+          if (
+            allDeletedFiles.length !==
+            validatedUpdateInstrumentDto.deletedFiles.length
+          ) {
+            throw new HttpException(`Some resources not found`, 404);
+          }
+          await prismaTransaction.instrumentResources.deleteMany({
             where: {
               id: {
                 in: validatedUpdateInstrumentDto.deletedFiles,
               },
             },
           });
-        if (
-          allDeletedFiles.length !==
-          validatedUpdateInstrumentDto.deletedFiles.length
-        ) {
-          throw new HttpException(`Some resources not found`, 404);
-        }
-        await prismaTransaction.instrumentResources.deleteMany({
-          where: {
-            id: {
-              in: validatedUpdateInstrumentDto.deletedFiles,
-            },
-          },
-        });
-        for (const deletedFile of allDeletedFiles) {
-          if (deletedFile.imagePath !== null) {
-            fs.unlinkSync(
-              `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${deletedFile.imagePath}`,
-            );
-          } else if (deletedFile.audioPath !== null) {
-            fs.unlinkSync(
-              `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${deletedFile.audioPath}`,
-            );
+          const cloudStorageInstance =
+            await this.cloudStorageService.loadCloudStorageInstance();
+          for (const deletedFile of allDeletedFiles) {
+            if (deletedFile.imagePath !== null) {
+              await cloudStorageInstance
+                .bucket(this.configService.get<string>('BUCKET_NAME'))
+                .file(`image-resources/${deletedFile.imagePath}`)
+                .delete();
+            } else if (deletedFile.audioPath !== null) {
+              await cloudStorageInstance
+                .bucket(this.configService.get<string>('BUCKET_NAME'))
+                .file(`instrument-resources/${deletedFile.audioPath}`)
+                .delete();
+            }
           }
         }
-      }
-      delete validatedUpdateInstrumentDto['deletedFiles'];
-      const { videoUrls, ...remainderProperty } = validatedUpdateInstrumentDto;
-      console.log(allFiles);
-      await prismaTransaction.instrumentResources.createMany({
-        data: await this.generateResourcePayload(
-          videoUrls,
-          instrumentPrisma,
-          allFiles,
-        ),
-      });
-      await prismaTransaction.instrument.update({
-        where: {
-          id: id,
-        },
-        data: {
-          ...remainderProperty,
-          instrumentCategory: validatedUpdateInstrumentDto.instrumentCategory,
-        },
-      });
-      return true;
-    });
+        delete validatedUpdateInstrumentDto['deletedFiles'];
+        const { videoUrls, ...remainderProperty } =
+          validatedUpdateInstrumentDto;
+        console.log(allFiles);
+        await prismaTransaction.instrumentResources.createMany({
+          data: await this.generateResourcePayload(
+            videoUrls,
+            instrumentPrisma,
+            allFiles,
+          ),
+        });
+        await prismaTransaction.instrument.update({
+          where: {
+            id: id,
+          },
+          data: {
+            ...remainderProperty,
+            instrumentCategory: validatedUpdateInstrumentDto.instrumentCategory,
+          },
+        });
+        return true;
+      },
+      {
+        timeout: 20000,
+      },
+    );
   }
 
   async remove(id: number) {
@@ -207,33 +224,38 @@ export class InstrumentService {
     }
     const cloudStorageInstance =
       await this.cloudStorageService.loadCloudStorageInstance();
-    for (const imageFile of allFiles['images']) {
-      const generatedFileName = `${uuidv4()}-${imageFile.originalname}`;
-      await CommonHelper.handleUploadImage(
-        cloudStorageInstance,
-        this.configService.get<string>('BUCKET_NAME'),
-        imageFile,
-        generatedFileName,
-        'image-resources',
-      );
-      instrumentResourcesPayload.push({
-        instrumentId: instrumentPrisma.id,
-        imagePath: generatedFileName,
-      });
+    if (allFiles.images !== undefined) {
+      for (const imageFile of allFiles['images']) {
+        const generatedFileName = `${uuidv4()}-${imageFile.originalname}`;
+        await CommonHelper.handleUploadImage(
+          cloudStorageInstance,
+          this.configService.get<string>('BUCKET_NAME'),
+          imageFile,
+          generatedFileName,
+          'image-resources',
+        );
+        instrumentResourcesPayload.push({
+          instrumentId: instrumentPrisma.id,
+          imagePath: generatedFileName,
+        });
+      }
     }
-    for (const audioFile of allFiles['audios']) {
-      const generatedFileName = `${uuidv4()}-${audioFile.originalname}`;
-      await CommonHelper.handleUploadImage(
-        cloudStorageInstance,
-        this.configService.get<string>('BUCKET_NAME'),
-        audioFile,
-        generatedFileName,
-        'audio-resources',
-      );
-      instrumentResourcesPayload.push({
-        instrumentId: instrumentPrisma.id,
-        audioPath: generatedFileName,
-      });
+
+    if (allFiles.audios !== undefined) {
+      for (const audioFile of allFiles['audios']) {
+        const generatedFileName = `${uuidv4()}-${audioFile.originalname}`;
+        await CommonHelper.handleUploadImage(
+          cloudStorageInstance,
+          this.configService.get<string>('BUCKET_NAME'),
+          audioFile,
+          generatedFileName,
+          'audio-resources',
+        );
+        instrumentResourcesPayload.push({
+          instrumentId: instrumentPrisma.id,
+          audioPath: generatedFileName,
+        });
+      }
     }
     return instrumentResourcesPayload;
   }

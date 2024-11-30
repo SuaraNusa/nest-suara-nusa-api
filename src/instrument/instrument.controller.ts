@@ -31,9 +31,7 @@ export class InstrumentController {
       audios?: Express.Multer.File[];
     },
   ) {
-    return {
-      data: await this.instrumentService.create(createInstrumentDto, allFiles),
-    };
+    return await this.instrumentService.create(createInstrumentDto, allFiles);
   }
 
   @Get()
@@ -59,13 +57,11 @@ export class InstrumentController {
       audios?: Express.Multer.File[];
     },
   ) {
-    return {
-      data: await this.instrumentService.update(
-        id,
-        updateInstrumentDto,
-        allFiles,
-      ),
-    };
+    return await this.instrumentService.update(
+      id,
+      updateInstrumentDto,
+      allFiles,
+    );
   }
 
   @Delete(':id')
