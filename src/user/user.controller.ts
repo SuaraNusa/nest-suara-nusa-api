@@ -1,14 +1,12 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
   Put,
-  UseInterceptors,
   UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CurrentUser } from '../authentication/decorator/current-user.decorator';
@@ -37,7 +35,7 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() profileFile: Express.Multer.File,
   ) {
-    await this.userService.update(loggedUser, updateUserDto, profileFile);
+    return this.userService.update(loggedUser, updateUserDto, profileFile);
   }
 
   @Delete(':id')

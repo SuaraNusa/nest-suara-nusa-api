@@ -28,7 +28,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       message = 'Internal server error';
     }
-
+    console.log(exception);
     // Menangani response
     response.status(status).json({
       status: status >= 200 && status < 400 ? 'success' : 'error',
