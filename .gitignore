@@ -63,3 +63,4 @@ prisma/migrations
 .open-api.html
 
 public/assets/instrument-resources
+public/assets/image-resources
