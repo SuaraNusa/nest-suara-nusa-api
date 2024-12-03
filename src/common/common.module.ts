@@ -8,9 +8,16 @@ import { ModelRegistryService } from './model-registry.service';
 import { CloudStorageService } from './cloud-storage.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AxiosService } from './axios.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
+    HttpModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useClass: AxiosService,
+    }),
     WinstonModule.forRoot({
       level: 'debug',
       format: winston.format.combine(
@@ -49,6 +56,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     MailerCustomService,
     ModelRegistryService,
     CloudStorageService,
+    AxiosService,
   ],
   exports: [
     PrismaService,
@@ -56,6 +64,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     MailerCustomService,
     ModelRegistryService,
     CloudStorageService,
+    HttpModule,
   ],
 })
 export class CommonModule {}

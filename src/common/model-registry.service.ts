@@ -1,5 +1,5 @@
 import '@tensorflow/tfjs-node';
-import { loadGraphModel } from '@tensorflow/tfjs-node';
+import { loadGraphModel, loadLayersModel } from "@tensorflow/tfjs-node";
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import * as fs from 'node:fs';
@@ -64,7 +64,7 @@ export class ModelRegistryService {
     // await this.downloadFolder(localModelPath);
 
     // Muat model menggunakan TensorFlow.js
-    this.modelInstance = await loadGraphModel(
+    this.modelInstance = await loadLayersModel(
       `file://${localModelPath}/model.json`,
     );
   }
