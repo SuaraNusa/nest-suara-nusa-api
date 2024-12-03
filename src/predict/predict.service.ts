@@ -6,7 +6,8 @@ import { HttpService } from '@nestjs/axios';
 import * as FormData from 'form-data'; // Import library FormData
 import { Readable } from 'stream';
 import { CreatePredictDto } from './dto/create-predict.dto';
-import { firstValueFrom } from 'rxjs'; // Untuk membaca buffer file
+import { firstValueFrom } from 'rxjs';
+import YouTube from 'youtube-sr'; // Untuk membaca buffer file
 
 @Injectable()
 export class PredictService {
@@ -42,9 +43,13 @@ export class PredictService {
           headers: formData.getHeaders(),
         }),
       );
-
-      console.log(response.data);
-      return response.data; // Mengembalikan data respons dari Infer API
+      const { predicted_class: predictedClass, score } = response.data;
+      const searchedVideos = await YouTube.search(predictedClass);
+      searchedVideos.map((m, i) => `[${++i}] ${m.title} (${m.url})`).join('\n');
+      return {
+        score: score,
+        videos: searchedVideos,
+      }; // Mengembalikan data respons dari Infer API
     } catch (error) {
       console.error('Error posting to Infer API:', error.message);
       throw error;
