@@ -139,7 +139,6 @@ export class InstrumentService {
         delete validatedUpdateInstrumentDto['deletedFiles'];
         const { videoUrls, ...remainderProperty } =
           validatedUpdateInstrumentDto;
-        console.log(allFiles);
         await prismaTransaction.instrumentResources.createMany({
           data: await this.generateResourcePayload(
             videoUrls,

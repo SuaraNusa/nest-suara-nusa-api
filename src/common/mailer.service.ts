@@ -50,7 +50,6 @@ export class MailerCustomService {
     try {
       return await nodeMailerTransporter.sendMail(mailOptions);
     } catch (err) {
-      console.log(err);
       throw new HttpException(
         'Error while sending email',
         HttpStatus.INTERNAL_SERVER_ERROR,

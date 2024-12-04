@@ -25,7 +25,6 @@ export class ModelRegistryService {
     const [files] = await bucketStorage
       .bucket('submissionmlgc-alfarezyyd-bucket-production')
       .getFiles({ prefix: 'submissions-model' });
-    console.log(files);
 
     for (const file of files) {
       const filePath = path.join(
@@ -37,7 +36,6 @@ export class ModelRegistryService {
       // Buat folder jika tidak ada
       try {
         fs.mkdirSync(dir, { recursive: true });
-        console.log(`Directory created: ${dir}`);
       } catch (error) {
         console.error(`Failed to create directory: ${error.message}`);
       }
@@ -45,11 +43,8 @@ export class ModelRegistryService {
       // Unduh file
       try {
         await file.download({ destination: filePath });
-        console.log(`Downloaded ${file.name} to ${filePath}`);
         if (fs.existsSync(filePath)) {
-          console.log(`File successfully saved at ${filePath}`);
         } else {
-          console.log(`File not found at ${filePath}`);
         }
       } catch (err) {
         console.error('Error downloading file:', err);

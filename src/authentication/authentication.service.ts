@@ -140,7 +140,6 @@ export class AuthenticationService {
 
   async handleGoogleLogin(expressRequest: Express.Request) {
     const currentUser = expressRequest['user'];
-    console.log(currentUser);
     await this.prismaService.$transaction(async (prismaTransaction) => {
       const userPrisma: User = await prismaTransaction.user.findFirst({
         where: {
@@ -165,7 +164,6 @@ export class AuthenticationService {
         email: currentUser['email'],
         emailVerifiedAt: new Date(),
       };
-      console.log(loggedUser);
       return {
         accessToken: this.jwtService.signAsync(loggedUser),
         refreshToken: currentUser['refreshToken'],
@@ -209,7 +207,6 @@ export class AuthenticationService {
       const allVerificationQuestionId = verificationQuestions.map((val) => {
         return val.verificationQuestionId;
       });
-      console.log(allVerificationQuestionId);
       const allVerificationQuestion =
         await prismaTransaction.verificationQuestion.findMany({
           where: {
@@ -218,7 +215,6 @@ export class AuthenticationService {
             },
           },
         });
-      console.log(allVerificationQuestion, verificationQuestions);
       if (allVerificationQuestion.length !== verificationQuestions.length) {
         throw new HttpException('Some verification question not found', 404);
       }
