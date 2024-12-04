@@ -47,15 +47,13 @@ export class AuthenticationService {
             HttpStatus.UNAUTHORIZED,
           );
         });
-      bcrypt.compare(
+      const isPasswordValid = bcrypt.compareSync(
         validatedUserCredentials.password,
         userPrisma.password,
-        function (_err, isMatch) {
-          if (!isMatch) {
-            return null;
-          }
-        },
       );
+      if (!isPasswordValid) {
+        return null;
+      }
       return {
         ...userPrisma,
       };

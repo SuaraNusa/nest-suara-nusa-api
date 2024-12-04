@@ -84,4 +84,3 @@ export class AuthenticationController {
     return this.authenticationService.handleGoogleLogin(expressRequest);
   }
 }
-// please add documentation for this request, add example of request and response
