@@ -27,32 +27,36 @@ export class InstrumentService {
       audios?: Express.Multer.File[];
     },
   ) {
-    const validatedCreateInstrumentDto = this.validationService.validate(
-      InstrumentValidation.SAVE,
-      createInstrumentDto,
-    );
-    return this.prismaService.$transaction(
-      async (prismaTransaction) => {
-        const { videoUrls, ...remainderProperty } =
-          validatedCreateInstrumentDto;
-        const instrumentPrisma: Instrument =
-          await prismaTransaction.instrument.create({
-            data: remainderProperty,
+    try {
+      const validatedCreateInstrumentDto = this.validationService.validate(
+        InstrumentValidation.SAVE,
+        createInstrumentDto,
+      );
+      return this.prismaService.$transaction(
+        async (prismaTransaction) => {
+          const { videoUrls, ...remainderProperty } =
+            validatedCreateInstrumentDto;
+          const instrumentPrisma: Instrument =
+            await prismaTransaction.instrument.create({
+              data: remainderProperty,
+            });
+          const allResourcePayload = await this.generateResourcePayload(
+            videoUrls,
+            instrumentPrisma,
+            allFiles,
+          );
+          await prismaTransaction.instrumentResources.createMany({
+            data: allResourcePayload,
           });
-        const allResourcePayload = await this.generateResourcePayload(
-          videoUrls,
-          instrumentPrisma,
-          allFiles,
-        );
-        await prismaTransaction.instrumentResources.createMany({
-          data: allResourcePayload,
-        });
-        return true;
-      },
-      {
-        timeout: 20000,
-      },
-    );
+          return true;
+        },
+        {
+          timeout: 20000,
+        },
+      );
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async findAll() {
