@@ -13,7 +13,6 @@ import { PredictService } from './predict.service';
 import { CreatePredictDto } from './dto/create-predict.dto';
 import { UpdatePredictDto } from './dto/update-predict.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { NoVerifiedEmail } from '../authentication/decorator/no-verified-email.decorator';
 import { Public } from 'src/authentication/decorator/public.decorator';
 
 @Controller('predict')
