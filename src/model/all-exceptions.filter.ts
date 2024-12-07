@@ -24,7 +24,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
       status = exception.getStatus();
       message = exception.getResponse();
     } else {
-      console.log(exception);
       // Default, jika bukan ZodError atau HttpException
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       message = 'Internal server error';
@@ -33,7 +32,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     response.status(status).json({
       status: status >= 200 && status < 400 ? 'success' : 'error',
       data: null,
-      errors: exception,
+      errors: message,
     });
   }
 }
