@@ -55,7 +55,8 @@ export class InstrumentService {
         },
       );
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
+      console.log(error.stack);
     }
   }
 
