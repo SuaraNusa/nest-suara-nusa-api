@@ -21,38 +21,43 @@ export class PredictService {
     createPredictDto: CreatePredictDto,
     voiceFile: Express.Multer.File, // File yang diupload
   ): Promise<any> {
-    const inferApiEndpoint =
-      this.configService.get<string>('INFER_API_ENDPOINT');
-
-    // Membuat FormData untuk multipart request
-    const formData = new FormData();
-    formData.append('voice', Readable.from(voiceFile.buffer), {
-      filename: voiceFile.originalname,
-      contentType: voiceFile.mimetype,
-    });
-
-    // Menambahkan data tambahan jika diperlukan
-    Object.keys(createPredictDto).forEach((key) => {
-      formData.append(key, createPredictDto[key]);
-    });
-
-    // Membuat request dengan header yang sesuai
     try {
-      const response = await firstValueFrom(
-        this.httpService.post(`${inferApiEndpoint}/predict`, formData, {
-          headers: formData.getHeaders(),
-        }),
-      );
-      const { predicted_class: predictedClass, score } = response.data;
-      const searchedVideos = await YouTube.search(predictedClass);
-      searchedVideos.map((m, i) => `[${++i}] ${m.title} (${m.url})`).join('\n');
-      return {
-        score: score,
-        videos: searchedVideos,
-      }; // Mengembalikan data respons dari Infer API
+      const inferApiEndpoint =
+        this.configService.get<string>('INFER_API_ENDPOINT');
+
+      // Membuat FormData untuk multipart request
+      const formData = new FormData();
+      formData.append('voice', Readable.from(voiceFile.buffer), {
+        filename: voiceFile.originalname,
+        contentType: voiceFile.mimetype,
+      });
+
+      // Menambahkan data tambahan jika diperlukan
+      Object.keys(createPredictDto).forEach((key) => {
+        formData.append(key, createPredictDto[key]);
+      });
+
+      // Membuat request dengan header yang sesuai
+      try {
+        const response = await firstValueFrom(
+          this.httpService.post(`${inferApiEndpoint}/predict`, formData, {
+            headers: formData.getHeaders(),
+          }),
+        );
+        const { predicted_class: predictedClass, score } = response.data;
+        const searchedVideos = await YouTube.search(predictedClass);
+        searchedVideos
+          .map((m, i) => `[${++i}] ${m.title} (${m.url})`)
+          .join('\n');
+        return {
+          score: score,
+          videos: searchedVideos,
+        }; // Mengembalikan data respons dari Infer API
+      } catch (error) {
+        console.error('Error posting to Infer API:', error.message);
+      }
     } catch (error) {
-      console.error('Error posting to Infer API:', error.message);
-      throw error;
+      console.error('Error when want to infer', error);
     }
   }
 
