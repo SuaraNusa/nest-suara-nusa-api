@@ -50,6 +50,7 @@ export class PredictService {
           .map((m, i) => `[${++i}] ${m.title} (${m.url})`)
           .join('\n');
         return {
+          songName: predictedClass,
           score: score,
           videos: searchedVideos,
         }; // Mengembalikan data respons dari Infer API
