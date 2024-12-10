@@ -43,69 +43,72 @@ export class UserService {
     let generatedFileName = `${uuidv4()}-${profileImage.originalname}`;
     const cloudStorageInstance =
       await this.cloudStorageService.loadCloudStorageInstance();
-    await this.prismaService.$transaction(async (prismaTransaction) => {
-      const { id: userId, photoPath } = await prismaTransaction.user
-        .findFirstOrThrow({
-          where: {
-            uniqueId: loggedUser.uniqueId,
-          },
-          select: {
-            id: true,
-            photoPath: true,
-          },
-        })
-        .catch(() => {
-          throw new HttpException('User does not exist', 400);
-        });
-      const bucketName = this.configService.get<string>('BUCKET_NAME');
-      await CommonHelper.handleUploadImage(
-        cloudStorageInstance,
-        bucketName,
-        profileImage,
-        generatedFileName,
-        'image-resources',
-      );
-      if (photoPath) {
-        await cloudStorageInstance
-          .bucket(bucketName)
-          .file(`image-resources/${photoPath}`)
-          .delete();
-      }
-      // if (photoPath) {
-      //   fs.unlinkSync(
-      //     `${this.configService.get<string>('MULTER_DEST')}/image-resources/${photoPath}`,
-      //   );
-      // }
-      // generatedFileName = await CommonHelper.handleSaveFileLocally(
-      //   this.configService,
-      //   profileImage,
-      //   'image-resources',
-      // );
-      delete validatedUpdatedUserDto['confirmPassword'];
-      let hashedPassword = '';
-      try {
-        const hashSalt = await bcrypt.genSalt(10); // Generate hashSalt
-        hashedPassword = await bcrypt.hash(
-          validatedUpdatedUserDto.password,
-          hashSalt,
-        ); // Hash the password
-      } catch (error) {
-        throw new HttpException(
-          'Error when trying to process request',
-          HttpStatus.INTERNAL_SERVER_ERROR,
+    await this.prismaService.$transaction(
+      async (prismaTransaction) => {
+        console.log(loggedUser);
+        const { id: userId, photoPath } = await prismaTransaction.user
+          .findFirstOrThrow({
+            where: {
+              OR: [
+                {
+                  uniqueId: loggedUser.uniqueId,
+                },
+                {
+                  email: loggedUser.email,
+                },
+              ],
+            },
+            select: {
+              id: true,
+              photoPath: true,
+            },
+          })
+          .catch(() => {
+            throw new HttpException('User does not exist', 400);
+          });
+        const bucketName = this.configService.get<string>('BUCKET_NAME');
+
+        await CommonHelper.handleUploadImage(
+          cloudStorageInstance,
+          bucketName,
+          profileImage,
+          generatedFileName,
+          'image-resources',
         );
-      }
-      await prismaTransaction.user.update({
-        where: {
-          id: userId,
-        },
-        data: {
-          ...validatedUpdatedUserDto,
-          photoPath: generatedFileName,
-          password: hashedPassword,
-        },
-      });
-      return 'Successfully updated user';
-    });
+        if (photoPath) {
+          await cloudStorageInstance
+            .bucket(bucketName)
+            .file(`image-resources/${photoPath}`)
+            .delete();
+        }
+
+        delete validatedUpdatedUserDto['confirmPassword'];
+        let hashedPassword = '';
+        try {
+          const hashSalt = await bcrypt.genSalt(10); // Generate hashSalt
+          hashedPassword = await bcrypt.hash(
+            validatedUpdatedUserDto.password,
+            hashSalt,
+          ); // Hash the password
+        } catch (error) {
+          throw new HttpException(
+            'Error when trying to process request',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+        await prismaTransaction.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            ...validatedUpdatedUserDto,
+            photoPath: generatedFileName,
+            password: hashedPassword,
+          },
+        });
+        return 'Successfully updated user';
+      },
+      { timeout: 30000 },
+    );
   }
 }

@@ -47,6 +47,7 @@ export class AuthenticationService {
             HttpStatus.UNAUTHORIZED,
           );
         });
+      console.log(userPrisma);
       const isPasswordValid = bcrypt.compareSync(
         validatedUserCredentials.password,
         userPrisma.password,
