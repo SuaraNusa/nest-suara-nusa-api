@@ -6,7 +6,7 @@ import PrismaExceptionFilter from './exception/PrismaExceptionFilter';
 import MulterExceptionFilter from './exception/MulterExceptionFilter';
 import { TransformResponseInterceptor } from './model/transform-response.interceptor';
 import { AllExceptionsFilter } from './model/all-exceptions.filter';
-import { ErrorLoggingInterceptor } from "./interceptor/ErrorLogginInterceptor";
+import { ErrorLoggingInterceptor } from './interceptor/ErrorLogginInterceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
