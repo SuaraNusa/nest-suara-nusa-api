@@ -36,8 +36,6 @@ export class UserService {
     updateUserDto: UpdateUserDto,
     profileImage: Express.Multer.File,
   ) {
-    console.log('Data Transfer Object: ' + updateUserDto);
-    console.log('Profile Image: ' + profileImage);
     const validatedUpdatedUserDto = this.validationService.validate(
       UserValidation.UPDATE_USER,
       updateUserDto,
