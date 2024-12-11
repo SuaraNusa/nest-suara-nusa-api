@@ -1,3 +1,7 @@
+<div align="center">
+  <em>Dengan rahmat tuhan yang maha Esa</em>
+</div>
+<hr/>
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="public/logo.png" width="200" alt="Nest Logo" /></a>
 </p>
@@ -25,12 +29,28 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This project is a SuaraNusa RESTful API built using NestJS, a progressive framework for Node.js. Designed with modularity and scalability in mind, it provides a clean structure for developing server-side applications. Leveraging the power of TypeScript, it ensures type safety and robust code practices.
 
+The API includes functionalities for handling CRUD operations, input validation, authentication, and seamless database integration. It is suitable for projects requiring efficient communication between client and server while maintaining security and reliability.
 ## Pre Requirement
 
 1. Yarn Package Manager
-
+2. MySQL/Database
+3. NestJS
+4. NodeJS
+   
+## Library/Tools Used
+1. TypeScript
+2. Zod Validation
+3. Axios
+4. Passport
+5. JWT
+6. NestJS
+7. Winston
+8. UUID
+9. YoutubeSR
+10. BCrypt
+    
 ## Installation
 
 ```bash
@@ -59,9 +79,9 @@ you'd like to join them, please [read more here](https://docs.nestjs.com/support
 
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
+- Author - [Aditya Alfarezy Damanik](linkedin.com/alfarezyyd)
+- GitHub - [https://github.com/alfarezyyd](https://github.com/alfarezyyd)
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+SuaraNusa Backend-API is [MIT licensed](LICENSE).
