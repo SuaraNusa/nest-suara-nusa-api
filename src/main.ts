@@ -38,7 +38,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new ErrorLoggingInterceptor());
 
-  const port = process.env.PORT || 3000; // Jika PORT tidak disetel, gunakan 8080
+  const port = process.env.PORT || 8080; // Jika PORT tidak disetel, gunakan 8080
   await app.listen(port);
 }
 
