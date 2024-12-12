@@ -35,6 +35,7 @@ export class AuthenticationService {
       userCredentials,
     );
     return this.prismaService.$transaction(async (prismaTransaction) => {
+      console.log(userCredentials);
       const userPrisma = await prismaTransaction.user
         .findFirstOrThrow({
           where: {
@@ -47,7 +48,6 @@ export class AuthenticationService {
             HttpStatus.UNAUTHORIZED,
           );
         });
-      console.log(userPrisma);
       const isPasswordValid = bcrypt.compareSync(
         validatedUserCredentials.password,
         userPrisma.password,

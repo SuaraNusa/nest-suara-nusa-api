@@ -7,7 +7,6 @@ import { InstrumentValidation } from './instrument.validation';
 import { Instrument } from '@prisma/client';
 import CommonHelper from '../helper/CommonHelper';
 import { ConfigService } from '@nestjs/config';
-import * as fs from 'node:fs';
 import { CloudStorageService } from '../common/cloud-storage.service';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,6 +26,7 @@ export class InstrumentService {
       audios?: Express.Multer.File[];
     },
   ) {
+    console.log(allFiles)
     try {
       const validatedCreateInstrumentDto = this.validationService.validate(
         InstrumentValidation.SAVE,
@@ -45,6 +45,7 @@ export class InstrumentService {
             instrumentPrisma,
             allFiles,
           );
+          console.log(allResourcePayload)
           await prismaTransaction.instrumentResources.createMany({
             data: allResourcePayload,
           });
@@ -136,7 +137,7 @@ export class InstrumentService {
             } else if (deletedFile.audioPath !== null) {
               await cloudStorageInstance
                 .bucket(this.configService.get<string>('BUCKET_NAME'))
-                .file(`instrument-resources/${deletedFile.audioPath}`)
+                .file(`audio-resources/${deletedFile.audioPath}`)
                 .delete();
             }
           }
@@ -169,6 +170,8 @@ export class InstrumentService {
   }
 
   async remove(id: number) {
+    const cloudStorageInstance =
+      await this.cloudStorageService.loadCloudStorageInstance();
     return this.prismaService.$transaction(async (prismaTransaction) => {
       await prismaTransaction.instrument
         .findFirstOrThrow({
@@ -185,15 +188,17 @@ export class InstrumentService {
             instrumentId: id,
           },
         });
-      for (const instrumentResource of allInstrumentResources) {
-        if (instrumentResource.imagePath !== null) {
-          fs.unlinkSync(
-            `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${instrumentResource.imagePath}`,
-          );
-        } else if (instrumentResource.audioPath !== null) {
-          fs.unlinkSync(
-            `${this.configService.get<string>('MULTER_DEST')}/instrument-resources/${instrumentResource.audioPath}`,
-          );
+      for (const deletedFile of allInstrumentResources) {
+        if (deletedFile.imagePath !== null) {
+          await cloudStorageInstance
+            .bucket(this.configService.get<string>('BUCKET_NAME'))
+            .file(`image-resources/${deletedFile.imagePath}`)
+            .delete();
+        } else if (deletedFile.audioPath !== null) {
+          await cloudStorageInstance
+            .bucket(this.configService.get<string>('BUCKET_NAME'))
+            .file(`audio-resources/${deletedFile.audioPath}`)
+            .delete();
         }
       }
       await prismaTransaction.instrumentResources.deleteMany({
