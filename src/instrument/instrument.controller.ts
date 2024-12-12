@@ -66,8 +66,6 @@ export class InstrumentController {
 
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
-    return {
-      data: await this.instrumentService.remove(+id),
-    };
+    return await this.instrumentService.remove(+id);
   }
 }
